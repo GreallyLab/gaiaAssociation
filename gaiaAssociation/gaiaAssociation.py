@@ -349,7 +349,10 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
 def main():
     
     ## parse the given arguments to see if the neccesary libraries have been given and 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog ='gaia',
+                                     description ='Compare ATAC-seq data to loci.')
+    
+    
     parser.add_argument('-u', '--ATACuniqueness',  default=0, required = False, type=int,
                         help='a cutoff value for ATAC uniqueness (e.g. if given 12, then any atac peak found in more than 12 atac sets will be removed from all of them) - by default uniqueness is not considered')
     parser.add_argument('-l', '--lociCutoff',default=0, required = True, type=int,
@@ -361,7 +364,7 @@ def main():
     parser.add_argument('-c', '--chrom', required = True, 
                         help='the folder location of the chromsome size files stored in .csv format')
     parser.add_argument('-o', '--output', required = True, 
-                        help='the folder location you want the results to be output inxs')
+                        help='the folder location you want the results to be output into')
 
     #(atacLocation, gwasLocation, chromosomeSize, outputLocation):
 
