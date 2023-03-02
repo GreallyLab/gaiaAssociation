@@ -8,4 +8,5 @@ gaiaAssociation.egg-info/SOURCES.txt
 gaiaAssociation.egg-info/dependency_links.txt
 gaiaAssociation.egg-info/entry_points.txt
 gaiaAssociation.egg-info/not-zip-safe
+gaiaAssociation.egg-info/requires.txt
 gaiaAssociation.egg-info/top_level.txt
