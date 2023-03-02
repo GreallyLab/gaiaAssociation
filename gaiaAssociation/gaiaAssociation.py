@@ -392,7 +392,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             os.mkdir(outputLocation + '/Overlaps')
         
     ##Create weight matrix
-    print("Creating Loci Weight Comparisons: ")
+    print("Calculating Loci Z-scores: ")
     for i in range(len(gwasPyranges)):
 
         ## create a temporary dataframe where we store the number of counts in this loci set per chromosome
@@ -427,7 +427,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
                 saveRange = gwasPyranges[i].coverage(reorderPyranges[j])
                 saveFrame = saveRange.df
                 saveFrame = saveFrame[saveFrame["NumberOverlaps"]!=0]
-                saveFrame.to_csv(outputLocation + '/Overlaps/' + reorderCellNames[j] + '_' + gwasNames[i] + '.txt',sep='\t')
+                saveFrame.to_csv(outputLocation + '/Overlaps/' + reorderCellNames[j] + '_' + gwasNames[i] + '.txt', sep='\t', index=False)
                 
 
             ##we generate a z-score based on a normal distribution centered on expected count with a variance equal to sqrt(mean)
