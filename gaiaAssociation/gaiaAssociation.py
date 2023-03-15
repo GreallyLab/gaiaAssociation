@@ -20,7 +20,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         
     ## ensure all the given locations and files are accesible and real
     if not os.path.exists(atacLocation):
-        sys.exit("ATAC folder cannot be found")
+        sys.exit("Cell region folder cannot be found")
     if not os.path.exists(gwasLocation):
         sys.exit("Loci folder cannot be found")
     if not os.path.exists(chromosomeSize):
@@ -64,7 +64,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         cellNames.append(s[s.rindex('/')+1:])
     
     if(len(dataFrameList)==0):
-        sys.exit("No ATAC files found")
+        sys.exit("No Cell region files found")
     
     ##do some light formating to ensure all atac-seq have the same labeling
     for i in range(len(dataFrameList)):
@@ -83,7 +83,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     ##create an empty matrix to store our associations in
     matrix1 = np.zeros((len(dataFrameList),len(dataFrameList)))
 
-    print("Formatting ATAC-seq: ")
+    print("Formatting Cell Regions: ")
     
     ##create list to store our pyRanges objects in, merge them to ensure regions arent double represented
     prRanges = []
@@ -105,7 +105,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         prRangesUnique = [] 
         prFrames = []
 
-        print("Finding Unique ATAC peaks between cell types:")
+        print("Finding Unique cell region peaks between cell types:")
         for j in range(len(prRanges)):
             prFrames.append(prRanges[j].df)
 
@@ -133,7 +133,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     ## If a merging region file is included then subset our ATAC sets using this region set
     if subsettingRegion != 0:
     
-        print("Subsetting ATAC peaks based on given region file:")
+        print("Subsetting cell region peaks based on given mask region file:")
     
         geneLocation = subsettingRegion
         geneFrame = pd.read_csv(geneLocation, sep="\t")
@@ -169,7 +169,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         dataFrameList = overlappedForms
         
         
-    print("Comparing ATAC-seq between cell types: ")
+    print("Comparing cell regions between cell types: ")
     
     ##this function loops through each cell type and compares it to every cell type with a lower index number than itself. the comparison is a simple overlap calculation, it then adds these values to its respective matrix
     for i in range(len(dataFrameList)):
@@ -205,9 +205,9 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         plt.figure(figsize=(10, 16))
         Z = scipy.cluster.hierarchy.linkage(distArray, method='single', metric='euclidean')
         dn = dendrogram(Z, labels=cellNames, orientation = "left")
-        plt.savefig(outputLocation + '/atac_dendrogram.pdf', bbox_inches = "tight")
+        plt.savefig(outputLocation + '/cell_region_dendrogram.pdf', bbox_inches = "tight")
     else:
-        print("You have only included one ATAC-seq set, this will omit the ATAC dendrogram")
+        print("You have only included one cell region set, this will omit the cell region dendrogram")
     
     print("Formatting loci:")
     
@@ -300,11 +300,11 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     gwasFormatted = gwasFormatted.rename(columns={"DISEASE/TRAIT": "DT"})
     
     ## subset loci based on cutoff value
-    vc = gwasFormatted.DT.value_counts()
     if lociCutoff != 0:
         print("Subsetting loci based on user-defined count:")
-    highCount = list(vc[vc > int(lociCutoff)].index)
-    gwasFormatted = gwasFormatted[(gwasFormatted["DT"].isin(highCount))]
+        vc = gwasFormatted.DT.value_counts()
+        highCount = list(vc[vc > int(lociCutoff)].index)
+        gwasFormatted = gwasFormatted[(gwasFormatted["DT"].isin(highCount))]
     
     
     ## Take only the user selected loci if the user has given a list
@@ -524,13 +524,9 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     plt.savefig(outputLocation + '/complete_figure.pdf', bbox_inches = "tight")
     
     ##save the matrix of z-scores in case they want to do something else with the formatting
-    ##function for sorting by indexes from w3resource
-    def sort_by_indexes(lst, indexes, reverse=False):
-      return [val for (_, val) in sorted(zip(indexes, lst), key=lambda x: \
-              x[0], reverse=reverse)]
     
     newHeatFrame = pd.DataFrame(newHeatMatrix)
-    newHeatFrame.columns = sort_by_indexes(gwasNames, leaves_list(Z2))
+    newHeatFrame.columns = [gwasNames[i] for i in leaves_list(Z2)]
     newHeatFrame.index = reorderCellNames
 
     newHeatFrame.to_csv(outputLocation + '/zscore_matrix.txt',sep='\t')
@@ -542,15 +538,15 @@ def main():
     parser = argparse.ArgumentParser(prog ='gaia',
                                      description ='Compare ATAC-seq data to loci.')
     
-    parser.add_argument('-a', '--atac', required = True, 
-                        help='the folder location of the atac bed files stored in .txt format')
+    parser.add_argument('-a', '--cellRegion', required = True,
+                        help='the folder location of the cell region bed files stored in .txt format')
     parser.add_argument('-g', '--loci', required = True, 
                         help='the folder location of the loci files stored in .tsv format')
     parser.add_argument('-c', '--chrom', required = True, 
                         help='the location of the chromsome size file stored in a .csv format')
     parser.add_argument('-o', '--output', required = True, 
                         help='the folder location you want the results to be output into')
-    parser.add_argument('-u', '--ATACuniqueness',  default=0, required = False, type=int,
+    parser.add_argument('-u', '--peakUniqueness',  default=0, required = False, type=int,
                         help='a cutoff value for ATAC uniqueness (e.g. if given 12, then any atac peak found in more than 12 atac sets will be removed from all of them) - by default uniqueness is not considered')
     parser.add_argument('-l', '--lociCutoff',default=0, required = False, type=int,
                         help='a loci cutoff value, will only consider loci groups (phenotypes or cohorts) with more loci than this cutoff value - by default this cutoff is 0')
@@ -565,4 +561,4 @@ def main():
 
     args = parser.parse_args()
 
-    gaiaAssociation(args.atac, args.loci, args.chrom, args.output, args.ATACuniqueness, args.lociCutoff, args.specificLoci, args.maskRegion, args.p, args.zcoreRangeCutoff)
+    gaiaAssociation(args.cellRegion, args.loci, args.chrom, args.output, args.peakUniqueness, args.lociCutoff, args.specificLoci, args.maskRegion, args.p, args.zcoreRangeCutoff)
