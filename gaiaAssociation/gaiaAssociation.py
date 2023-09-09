@@ -14,9 +14,23 @@ import seaborn as sns
 import statistics
 import math
 import argparse
+from scipy.optimize import root
+from scipy.stats import norm
+
+
+####
+
+#### Gaia Association:
+
+#### Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, SNPs, rare variants) to detect cell-specific enrichment of loci.
+
+### Named for James Lovelock's Gaia Hypothesis
+
+####
+
 
 ##Primary function for associating ATAC and GWAS
-def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, uniqueCount=0, lociCutoff=0, lociSelection = 0, subsettingRegion=0, saveOverlap = False, zscoreRange =0):
+def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, uniqueCount=0, lociCutoff=0, lociSelection = 0, subsettingRegion=0, saveOverlap = False, windowSize = 100000):
         
     ## ensure all the given locations and files are accesible and real
     if not os.path.exists(atacLocation):
@@ -102,13 +116,16 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         ## Create unique sets of ATAC based on a cutoff value of number of overlaps
         overlapCutoff = int(uniqueCount)
 
+        ##create New locations to store unique regions
         prRangesUnique = [] 
         prFrames = []
 
-        print("Finding Unique cell region peaks between cell types:")
+        ##save the current dataframes to new location for altering (this may be redundant based on python memory handling)
+        print("Finding Unique Cell Region Peaks Between Cell Types:")
         for j in range(len(prRanges)):
             prFrames.append(prRanges[j].df)
 
+        ##Loop through each atac set and compare against all others, remove locations with overlaps greater than overlap cutoff
         for j in range(len(prFrames)):
 
             if( j != len(prFrames) - 1):
@@ -118,7 +135,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
                 print("Cell Type " + str(j+1), end = "\n") 
                 testFrame = pd.concat(prFrames[:j])
 
-
+            
             allButMain = pr.PyRanges(testFrame)
             loopRange = prRanges[j].coverage(allButMain)
             mainFrame = loopRange.df
@@ -133,7 +150,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     ## If a merging region file is included then subset our ATAC sets using this region set
     if subsettingRegion != 0:
     
-        print("Subsetting cell region peaks based on given mask region file:")
+        print("Subsetting Cell Region Peaks Based on given mask region file:")
     
         geneLocation = subsettingRegion
         geneFrame = pd.read_csv(geneLocation, sep="\t")
@@ -151,6 +168,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         if "end" in geneFrame.columns:
             geneFrame = geneFrame.rename(columns={"end": "End"})
     
+        ## Only keep regions which intersect with this subsetting region
         overlappedForms = []
         overlappedRanges = []
         for item in prRanges:
@@ -173,6 +191,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     
     ##this function loops through each cell type and compares it to every cell type with a lower index number than itself. the comparison is a simple overlap calculation, it then adds these values to its respective matrix
     for i in range(len(dataFrameList)):
+    
         if( i != len(dataFrameList) - 1):
             print("Cell Type " + str(i+1), end = " - ") 
         else:
@@ -197,7 +216,6 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
 
                     matrix1[j,i] = weightValue
     
-    
     ## If the user only included one atac-seq we need to skip steps which would fail with only atac, this includes making a dendrogram using scipy
     if len(dataFrameList) > 1:
         ##Create the first figure, the dendrogram of ATAC-seq datasets
@@ -214,6 +232,16 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     ##Bring in our Loci sets
     gwasFrame = 0
     
+    ## columns we wish to save
+    final_columns = ["CHR_ID", "Start", "CHR_POS", "End", "Chromosome", "DISEASE/TRAIT"]
+    if lociSelection != 0:
+    
+        lociSelectDF=pd.read_csv(lociSelection,sep='\t')
+        tempColumnList = lociSelectDF.columns
+        final_columns.extend(tempColumnList)
+    
+    
+    
     ##add GWAS in tsv format
     for filename in glob.glob(gwasLocation + "/" + '*.tsv'):
         loopFrame = pd.read_csv(filename, sep="\t", low_memory=False)
@@ -221,6 +249,8 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         ## give a backup id by file count, in case they dont have an identity column
         s = filename[:-4]
         loopFrame["fileId"] =  (s[s.rindex('/')+1:])
+        
+        loopFrame = loopFrame[(loopFrame[loopFrame.columns[0]].notna()) & (loopFrame[loopFrame.columns[1]].notna())]
         
         ##These if statements are to account for various formatting mistakes
         if "DISEASE/TRAIT" not in loopFrame.columns:
@@ -231,73 +261,110 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             loopFrame["CHR_POS"] = loopFrame["start"].astype(int)
         if "Reference_name" in loopFrame.columns:
             loopFrame["Chromosome"] = loopFrame["Reference_name"]
+            loopFrame["CHR_ID"] = loopFrame["Reference_name"]
+        if "reference_name" in loopFrame.columns:
+            loopFrame["Chromosome"] = loopFrame["reference_name"]
+            loopFrame["CHR_ID"] = loopFrame["reference_name"]
         if "Chromosome" in loopFrame.columns:
             loopFrame["CHR_ID"] = loopFrame["Chromosome"]
         if "chr" in loopFrame.columns:
             loopFrame["CHR_ID"] = loopFrame["chr"]
-            loopFrame["Chromosome"] = loopFrame["chr"]
+            
+        loopFrame["Chromosome"] = loopFrame["CHR_ID"]
+        
+        ##if gwas is missing chr part of chromosome ids than add it
+        if (1 in loopFrame.Chromosome.unique()) or ('1' in loopFrame.Chromosome.unique()):
+                    loopFrame["Chromosome"] = "chr" + loopFrame["Chromosome"]
+                
         
         if not isinstance(gwasFrame, pd.DataFrame):
+            loopFrame.drop(columns=loopFrame.columns.difference(final_columns), inplace=True)
+            loopFrame = loopFrame[pd.to_numeric(loopFrame['CHR_POS'], errors='coerce').notnull()]
+            loopFrame['CHR_ID'] = loopFrame['CHR_ID'].astype('category')
             gwasFrame = loopFrame
         else:
-            gwasFrame = pd.concat([gwasFrame, loopFrame], axis=0, ignore_index=True)
+            loopFrame.drop(columns=loopFrame.columns.difference(final_columns), inplace=True)
+            loopFrame = loopFrame[pd.to_numeric(loopFrame['CHR_POS'], errors='coerce').notnull()]
+            loopFrame['CHR_ID'] = loopFrame['CHR_ID'].astype('category')
+            gwasFrame = pd.concat([gwasFrame, loopFrame],axis=0, ignore_index=True)
+            
             
     ## add GWAS in csv format
     for filename in glob.glob(gwasLocation + "/" + '*.csv'):
     
-            loopFrame = pd.read_csv(filename, low_memory=False)
+        loopFrame = pd.read_csv(filename, low_memory=False)
+        
+        ## give a backup id by file count, in case they dont have an identity column
+        s = filename[:-4]
+        loopFrame["fileId"] =  (s[s.rindex('/')+1:])
+        
+        loopFrame = loopFrame[(loopFrame[loopFrame.columns[0]].notna()) & (loopFrame[loopFrame.columns[1]].notna())]
+
+        
+        ##These if statements are to account for various formatting mistakes
+        if "DISEASE/TRAIT" not in loopFrame.columns:
+            loopFrame["DISEASE/TRAIT"] = loopFrame["fileId"]
+        if "Start" in loopFrame.columns:
+            loopFrame["CHR_POS"] = loopFrame["Start"].astype(int)
+        if "start" in loopFrame.columns:
+            loopFrame["CHR_POS"] = loopFrame["start"].astype(int)
+        if "Reference_name" in loopFrame.columns:
+            loopFrame["Chromosome"] = loopFrame["Reference_name"]
+            loopFrame["CHR_ID"] = loopFrame["Reference_name"]
+        if "reference_name" in loopFrame.columns:
+            loopFrame["Chromosome"] = loopFrame["reference_name"]
+            loopFrame["CHR_ID"] = loopFrame["reference_name"]
+        if "Chromosome" in loopFrame.columns:
+            loopFrame["CHR_ID"] = loopFrame["Chromosome"]
+        if "chr" in loopFrame.columns:
+            loopFrame["CHR_ID"] = loopFrame["chr"]
             
-            ## give a backup id by file count, in case they dont have an identity column
-            s = filename[:-4]
-            loopFrame["fileId"] =  (s[s.rindex('/')+1:])
-            
-            ##These if statements are to account for various formatting mistakes
-            if "DISEASE/TRAIT" not in loopFrame.columns:
-                loopFrame["DISEASE/TRAIT"] = loopFrame["fileId"]
-            if "Start" in loopFrame.columns:
-                loopFrame["CHR_POS"] = loopFrame["Start"].astype(int)
-            if "start" in loopFrame.columns:
-                loopFrame["CHR_POS"] = loopFrame["start"].astype(int)
-            if "Reference_name" in loopFrame.columns:
-                loopFrame["Chromosome"] = loopFrame["Reference_name"]
-            if "Chromosome" in loopFrame.columns:
-                loopFrame["CHR_ID"] = loopFrame["Chromosome"]
-            if "chr" in loopFrame.columns:
-                loopFrame["CHR_ID"] = loopFrame["chr"]
-                loopFrame["Chromosome"] = loopFrame["chr"]
-            
-            if not isinstance(gwasFrame, pd.DataFrame):
-                gwasFrame = loopFrame
-            else:
-                gwasFrame = pd.concat([gwasFrame, loopFrame],axis=0, ignore_index=True)
+        loopFrame["Chromosome"] = loopFrame["CHR_ID"]
+        
+        ##if gwas is missing chr part of chromosome ids than add it
+        if (1 in loopFrame.Chromosome.unique()) or ('1' in loopFrame.Chromosome.unique()):
+                    loopFrame["Chromosome"] = "chr" + loopFrame["Chromosome"]
+        
+        if not isinstance(gwasFrame, pd.DataFrame):
+            loopFrame.drop(columns=loopFrame.columns.difference(final_columns), inplace=True)
+            loopFrame = loopFrame[pd.to_numeric(loopFrame['CHR_POS'], errors='coerce').notnull()]
+            loopFrame['CHR_ID'] = loopFrame['CHR_ID'].astype('category')
+            gwasFrame = loopFrame
+        else:
+            loopFrame.drop(columns=loopFrame.columns.difference(final_columns), inplace=True)
+            loopFrame = loopFrame[pd.to_numeric(loopFrame['CHR_POS'], errors='coerce').notnull()]
+            loopFrame['CHR_ID'] = loopFrame['CHR_ID'].astype('category')
+            gwasFrame = pd.concat([gwasFrame, loopFrame],axis=0, ignore_index=True)
                 
     if not isinstance(gwasFrame, pd.DataFrame):
         sys.exit("No Loci files found")
     
     ##format our Loci frame by getting rid of NAN values and then getting rid of studies with non-numerical chromosome positions, if you want to fix these chromosome positions manually, you can
+    print("Removing Empty Loci Values:")
     gwasNoNAN = gwasFrame[(gwasFrame["CHR_POS"].notna()) & (gwasFrame["DISEASE/TRAIT"].notna())]
     
     gwasNoNAN = gwasNoNAN.reset_index(drop=True)
     
-    
-    floatIndexes = []
+    ## Location to save all non-numeric indexes
     nonNumericIndexes = []
-    for index, row in gwasNoNAN.iterrows():
-        if isinstance(gwasNoNAN.at[index, "CHR_POS"], float):
-            floatIndexes.append(index)
-            gwasNoNAN.at[index, "CHR_POS"] = int(gwasNoNAN.at[index, "CHR_POS"])
-        elif isinstance(gwasNoNAN.at[index, "CHR_POS"], str):
-            if gwasNoNAN.at[index, "CHR_POS"].isdigit():
-                gwasNoNAN.at[index, "CHR_POS"] = int(gwasNoNAN.at[index, "CHR_POS"])
-            else:
-                nonNumericIndexes.append(index)
-        elif not np.issubdtype(gwasNoNAN.at[index, "CHR_POS"], int):
-            nonNumericIndexes.append(index)
-        
-    gwasFormatted = gwasNoNAN.drop(index=nonNumericIndexes)
     
-    ### rename the Disease/TRait column to more easily callable DT column
-    gwasFormatted = gwasFormatted.rename(columns={"DISEASE/TRAIT": "DT"})
+    ## if chromosome position isn't an integer than check for non-int rows to remove or try to force into int
+    if gwasNoNAN["CHR_POS"].dtype != np.int64:
+        print("Non integer chromosome positions detected, these will be removed")
+        for index, row in gwasNoNAN.iterrows():
+            if isinstance(gwasNoNAN.at[index, "CHR_POS"], float):
+                gwasNoNAN.at[index, "CHR_POS"] = int(gwasNoNAN.at[index, "CHR_POS"])
+            elif isinstance(gwasNoNAN.at[index, "CHR_POS"], str):
+                if gwasNoNAN.at[index, "CHR_POS"].isdigit():
+                    gwasNoNAN.at[index, "CHR_POS"] = int(gwasNoNAN.at[index, "CHR_POS"])
+                else:
+                    nonNumericIndexes.append(index)
+            elif not np.issubdtype(gwasNoNAN.at[index, "CHR_POS"], int):
+                nonNumericIndexes.append(index)
+    
+    ## Drop indexes of values that couldnt be forced into integer
+    gwasFormatted = gwasNoNAN.drop(index=nonNumericIndexes)
+
     
     ## subset loci based on cutoff value
     if lociCutoff != 0:
@@ -307,42 +374,102 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         gwasFormatted = gwasFormatted[(gwasFormatted["DT"].isin(highCount))]
     
     
-    ## Take only the user selected loci if the user has given a list
-    if lociSelection != 0:
-        print("Subsetting loci based on user-defined list:")
-        lociTypeList = []
-        with open(lociSelection) as f:
-            for line in f:
-                lociTypeList.append(line)
-                lociTypeList = [loci.rstrip('\n') for loci in lociTypeList]
-    
-        gwasFormatted = gwasFormatted[(gwasFormatted["DT"].isin(lociTypeList))]
-    ###
-    
-    ###
-    
-    ###
-    
     ##Create columns for turning into pyranges
     gwasFormatted["Start"] = gwasFormatted["CHR_POS"]
     if "End" not in gwasFrame.columns:
-        gwasFormatted["End"] = gwasFormatted["CHR_POS"]
+        gwasFormatted["End"] = gwasFormatted["CHR_POS"] + 1
     if "Chromosome" not in gwasFrame.columns:
-        gwasFormatted["Chromosome"] = "chr" + gwasFormatted["CHR_ID"].astype(str)
+        temp = '\t'.join(gwasFrame.CHR_ID.unique())
+        if "chr" not in temp:
+            gwasFormatted["Chromosome"] = "chr" + gwasFormatted["CHR_ID"].astype(str)
+        else:
+            gwasFormatted["Chromosome"] = gwasFormatted["CHR_ID"].astype(str)
+            
+    ##if the length is zero give it a 1 length
+    gwasFormatted.loc[gwasFormatted.Start == gwasFormatted.End, "End"] = gwasFormatted.loc[gwasFormatted.Start == gwasFormatted.End, "End"] + 1
+            
+    ## Subset by loci selection if given
+    if lociSelection != 0:
+        gwasNames = []
+        
+        eachLociFrame = []
+        columnList = lociSelectDF.columns
+        for index, row in lociSelectDF.iterrows():
+            temp = lociSelectDF.iloc[[index]]
+            dtName = str(list(temp[columnList[0]])[0])
+            lociLoopFrame = gwasFormatted[gwasFormatted[columnList[0]] == list(temp[columnList[0]])[0]]
+            for item in columnList:
+                lociLoopFrame = lociLoopFrame[lociLoopFrame[item] == list(temp[item])[0]]
+                dtName = dtName + str(list(temp[item])[0])
+            eachLociFrame.append(lociLoopFrame)
+            gwasNames.append(dtName)
+            if lociLoopFrame.shape[0] == 0:
+                print(dtName)
+                sys.exit("One of the user given loci groups does not exist")
+                
+    
+    ### rename the Disease/Trait column to more easily callable DT column
+    gwasFormatted = gwasFormatted.rename(columns={"DISEASE/TRAIT": "DT"})
     
     ##save pyranges for each disease/trait
+    print("Turning GWAS into Pyranges Objects:")
     gwasPyranges = []
-    for item in set(gwasFormatted["DT"]):
-        
-        loopFrame = gwasFormatted[(gwasFormatted["DT"] == item)]
-        
-        tempRange = pr.PyRanges(loopFrame)
-        loopRange = tempRange
-        df = pd.DataFrame(list(zip(loopRange.Chromosome, loopRange.Start, loopRange.End)),columns =['Chromosome', 'Start', 'End'])
-        df["Size"] = df["End"] - df["Start"]
-        testRange = pr.PyRanges(df)
-        gwasPyranges.append(testRange)
-        
+    gwasNonZeroPyranges = []
+    indels = False
+    
+    if lociSelection == 0:
+        gwasNames = list(set(gwasFormatted["DT"]))
+        for item in set(gwasFormatted["DT"]):
+            
+            ##subset for each loci type
+            loopFrame = gwasFormatted[(gwasFormatted["DT"] == item)]
+            
+            ##remove duplicate loci
+            loopFrame = loopFrame.drop_duplicates(subset=['CHR_ID', 'Start', 'End'])
+            
+            ##Subset into appropriate columns and add to our list of final loci ranges
+            tempRange = pr.PyRanges(loopFrame)
+            loopRange = tempRange
+            df = pd.DataFrame(list(zip(loopRange.Chromosome, loopRange.Start, loopRange.End)),columns =['Chromosome', 'Start', 'End'])
+            df["Size"] = df["End"] - df["Start"]
+            dfSingle = df[df["Size"] <= 1]
+            testRange = pr.PyRanges(dfSingle)
+            gwasPyranges.append(testRange)
+            
+            ##If there are indels we need to create range including all these larger than 1 bp loci, otherwise mark that it is blank
+            if df.Size.max() > 1:
+                print("Indels Detected in " + item + ", Statistical Method For Loci >1 bp Will Be Applied")
+                indels = True
+                df = df[df["Size"] > 1]
+                indelLoopRange = pr.PyRanges(df)
+                gwasNonZeroPyranges.append(indelLoopRange)
+            else:
+                gwasNonZeroPyranges.append([])
+                
+    else:
+        for countIndel, item in enumerate(eachLociFrame):
+            
+            ##remove duplicate loci
+            loopFrame = item.drop_duplicates(subset=['CHR_ID', 'Start', 'End'])
+            
+            ##Subset into appropriate columns and add to our list of final loci ranges
+            tempRange = pr.PyRanges(loopFrame)
+            loopRange = tempRange
+            df = pd.DataFrame(list(zip(loopRange.Chromosome, loopRange.Start, loopRange.End)),columns =['Chromosome', 'Start', 'End'])
+            df["Size"] = df["End"] - df["Start"]
+            dfSingle = df[df["Size"] <= 1]
+            testRange = pr.PyRanges(dfSingle)
+            gwasPyranges.append(testRange)
+            
+            ##If there are indels we need to create range including all these larger than 1 bp loci, otherwise mark that it is blank
+            if df.Size.max() > 1:
+                print("Indels Detected in " + gwasNames[countIndel] + "Statistical Method For Loci >1 BP Will Be Applied")
+                indels = True
+                df = df[df["Size"] > 1]
+                indelLoopRange = pr.PyRanges(df)
+                gwasNonZeroPyranges.append(indelLoopRange)
+            else:
+                gwasNonZeroPyranges.append([])
         
     ##Create a reordered list of our ATAC-sets based on how they showed up in the dendrogram. This step will be skipped if there is only one ATAC-seq set
     reorderPyranges = []
@@ -358,162 +485,200 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         reorderPyranges = prRanges
         reorderDataframeList = dataFrameList
     
-    
+    ## create matrices to store p-values and overlap information
     heatmapMatrix = np.zeros((len(reorderPyranges),len(gwasPyranges)))
-    
-    gwasNames = list(set(gwasFormatted["DT"]))
-    
-    
+    overlapMatrix = np.zeros((len(reorderPyranges),len(gwasPyranges)))
     
     ## create the chromosome ratios for every atac-seq set
-    
     chromSize = pd.read_csv(chromosomeSize, thousands=',')  
     chromSize = chromSize.sort_values(by=['Chromosome'])
-    ATACratios = []
-    accpetableChrom = list(chromSize['Chromosome'])
-    for item in reorderPyranges:
-
-        itemLoop = item.df
-        itemTemp = itemLoop[itemLoop['Chromosome'].isin(accpetableChrom)]
-        itemTemp = itemTemp.rename(columns={"Size": "sizeATAC"})
         
-        dff = itemTemp.groupby(["Chromosome"]).sizeATAC.sum().reset_index()
-        dff = dff.merge(chromSize, left_on='Chromosome', right_on='Chromosome')
-        dff = dff.rename(columns={"size in bp": "sizeChrom"})
-        dff["ratio"] = dff["sizeATAC"]/dff["sizeChrom"]
-        
-        dff["ratio"] = dff["sizeATAC"]/dff["sizeChrom"]
-        
-        ATACratios.append(dff)
-        
-    ##if saveOverlap flag is sent, then make sure we have a subfolder to save them to
+    ##if saveOverlap flag is sent, then make sure we have a subfolder to save them to, as well as a sub-sub folder to save the master count file in
     if saveOverlap != False:
         if not os.path.exists(outputLocation + '/Overlaps'):
             os.mkdir(outputLocation + '/Overlaps')
+            os.mkdir(outputLocation + '/Overlaps/Complete')
         
-    ##Create weight matrix
-    print("Calculating Loci Z-scores: ")
-    for i in range(len(gwasPyranges)):
+    ##create weight matrix
 
-        ## create a temporary dataframe where we store the number of counts in this loci set per chromosome
-        tempCountFrame = pd.DataFrame(gwasPyranges[i].df.Chromosome.value_counts())
-        tempCountFrame = tempCountFrame.reset_index(level=0)
-        tempCountFrame = tempCountFrame.sort_values(by=['index'])
-        tempCountFrame = tempCountFrame.rename(columns={"Chromosome": "count", "index": "Chromosome"})
-
-        ##print a label for each itteration
-        if( i != len(gwasPyranges) - 1):
-            print("Loci: " + gwasNames[i], end = " - ")
-        else:
-            print("Loci: " + gwasNames[i], end = "\n")
-
-        ## Compare this Loci set against every atac set
-        for j in range(len(reorderPyranges)):
-
-            ## Combine out our counts with the atac ratios we made earlier
-            finalCountFrame = tempCountFrame.merge(ATACratios[j], left_on='Chromosome', right_on='Chromosome')
-            
-            ## find how many overlaps we would expect based purely on chance, that is: percentage of chromosome covered in open regions * number of counts in that chromosome. Do this for every chromosome and then sum it
-            expectedCount = sum(finalCountFrame["count"] * finalCountFrame["ratio"])
-
-            ## find how many overlaps there actually were by comparing our loci set to this atac set
-            loopRange = reorderPyranges[j].coverage(gwasPyranges[i])
-
-            ## get the sum of those overlaps
-            overlaps = sum(loopRange.NumberOverlaps)
-            
-            ##if saveOverlap flag is sent, then save every single individual overlap file
-            if saveOverlap != False:
-                saveRange = gwasPyranges[i].coverage(reorderPyranges[j])
-                saveFrame = saveRange.df
-                saveFrame = saveFrame[saveFrame["NumberOverlaps"]!=0]
-                saveFrame.to_csv(outputLocation + '/Overlaps/' + reorderCellNames[j] + '_' + gwasNames[i] + '.txt', sep='\t', index=False)
-                
-
-            ##we generate a z-score based on a normal distribution centered on expected count with a variance equal to sqrt(mean)
-            if expectedCount != 0:
-                zscoreVal = statistics.NormalDist(mu=expectedCount, sigma=math.sqrt(expectedCount)).zscore(overlaps)
-                
-            ##if there are 0 expected overlaps (theoretically impossible edge case, but, rounding errors in computer may make it happen) make a normal distribution centered on 0 with a standard deviation of 1
+    ##Based on window sizes divide our chromosomes into equal sized chuncks
+    windowFrames = []
+    for index, row in chromSize.iterrows():
+        chrSize = int(chromSize.at[index, "size in bp"])
+        n = math.ceil(chrSize/windowSize)
+        windowSizesLoop = []
+        zp = n - (chrSize % n)
+        pp = chrSize//n
+        for i in range(n):
+            if(i>= zp):
+                windowSizesLoop.append(pp + 1)
             else:
-                zscoreVal = statistics.NormalDist(mu=expectedCount, sigma=1).zscore(overlaps)
+                windowSizesLoop.append(pp)
+                
+        chrWindowDF = pd.DataFrame(windowSizesLoop, columns =['Size'])
+        chrWindowDF["End"] = chrWindowDF["Size"].cumsum()
+        chrWindowDF["Start"] = chrWindowDF["End"] - chrWindowDF["Size"] + 1
+        chrWindowDF.at[0,"Start"] = chrWindowDF.at[0,"Start"] -1
+        chrWindowDF["Chromosome"] = chromSize.at[index, "Chromosome"]
+        
+        windowFrames.append(chrWindowDF)
+        
+    allWindowsDF = pd.concat(windowFrames)
+        
+    ## find overlaps and probability for each ATAC + GWAS
+    listOverlaps = []
+    overlapAllColumns = []
 
-            ## add our z score to the matrix
-            heatmapMatrix[j,i] = zscoreVal
+    windowsRange = pr.PyRanges(allWindowsDF)
+    windowStarts = list(allWindowsDF.Start)
+    windowEnds = list(allWindowsDF.End)
+    windowChrs = list(allWindowsDF.Chromosome)
+    dictWindows = {"Start":windowStarts, "End":windowEnds, "Size":list(allWindowsDF.Size), "Chromosome":windowChrs}
 
-         
+
+    print("Calculating Overlaps: ")
+    if indels == True:
+        print("Note: Indels signifigantly effect runtime")
+    for count, item in enumerate(reorderPyranges):
+    
+        if( count != len(reorderPyranges) - 1):
+            print(reorderCellNames[count], end = " - ")
+        else:
+            print(reorderCellNames[count], end = "\n")
+    
+        tempRange = windowsRange.coverage(item)
+        dictWindows[reorderCellNames[count]] = list(tempRange.FractionOverlaps)
+        
+        ##if there are indels then save the number of atac peaks per each window, this will be need for calculations at the end
+        if indels == True:
+            dictWindows[reorderCellNames[count] + "PeakCount"] = list(tempRange.NumberOverlaps)
+        
+        ##find the number of overlaps
+        for count2, item2 in enumerate(gwasPyranges):
+            tempRange2 = windowsRange.coverage(item2)
+            dictWindows[reorderCellNames[count] + gwasNames[count2]] = list(tempRange2.NumberOverlaps)
+            
+            ## If Indels exist we need to do some more expansive calculations
+            if indels == True:
+            
+                ## if indels exist in this particular gwas set continue on to indel caluclations
+                if gwasNonZeroPyranges[count2]:
+                
+                    ##Grab all indels that overlap with the current ATAC set
+                    indelRangeTemp = gwasNonZeroPyranges[count2].coverage(item)
+                    indelOverlap = indelRangeTemp.df
+                    
+                    ## keep only those that overlap
+                    indelOverlap = indelOverlap[indelOverlap["NumberOverlaps"] > 0]
+                    
+                    ##now create a list of every bp where an indel exists at
+                    indelOverlap = indelOverlap.reset_index(drop=True)
+                    indelOverlap['range']=indelOverlap.apply(lambda x : list(range(x['Start'],x['End'])),1)
+                    indelChroDict = {}
+                    for item in list(set(indelOverlap.Chromosome)):
+                        indelChroLoop = indelOverlap[indelOverlap["Chromosome"] == item]
+                        indelLoopLocations = [item for sublist in indelChroLoop["range"] for item in sublist]
+                        indelChroDict[item] = indelLoopLocations
+                    
+                    indelExtraOverlap = []
+                    
+                    ##Get the number of these overlaps for each window so we can add them to the count
+                    indelDoubleOverlap = indelOverlap.drop(['range', 'NumberOverlaps'], axis=1)
+                    indelDoubleOverlap = pr.PyRanges(indelDoubleOverlap)
+                    doubleOverlapCount = windowsRange.coverage(indelDoubleOverlap)
+                    doubleOverlapList = list(doubleOverlapCount.NumberOverlaps)
+                    
+                    ## for each window space, find how much length of indel exists in the window
+                    for windowCount, windowItem in enumerate(windowStarts):
+                            
+                        if windowChrs[windowCount] in indelChroDict:
+                            indelWindowSize = [num for num in indelChroDict[windowChrs[windowCount]] if num <= windowEnds[windowCount] and num >= windowStarts[windowCount]]
+                        else:
+                            indelWindowSize = []
+                            
+                        ## if none exist, add zero to list of indel overlap, if it does add the total number of bp that do
+                        if len(indelWindowSize) == 0:
+                            indelExtraOverlap.append(0)
+                        else:
+                            indelSize = len(indelWindowSize)
+                            indelExtraOverlap.append(indelSize)
+                        
+                    ##grab the number of peaks per window
+                    listCount = dictWindows[reorderCellNames[count] + "PeakCount"]
+                    
+                    ##multiply the extra length we need to add to every atac peak within every window
+                    listSize = [a*b for a,b in zip(listCount,indelExtraOverlap)]
+                    
+                    ## take this extra size to calculate an added probability
+                    listProb = [a/b for a,b in zip(listSize, dictWindows["Size"])]
+                    
+                    ##Add this probability to the base probability for a gwas specific probability
+                    dictWindows[reorderCellNames[count]+ gwasNames[count2] + "Prob"] = [a+b for a,b in zip(dictWindows[reorderCellNames[count]], listProb)]
+                    
+                    ##Add number of indel overlaps
+                    dictWindows[reorderCellNames[count] + gwasNames[count2] + "IndelOverlap"] =  doubleOverlapList
+                    
+                    ## Get the total number of indels in region to add to count
+                    totalIndelRange = windowsRange.coverage(gwasNonZeroPyranges[count2])
+                    totalIndelList = list(totalIndelRange.NumberOverlaps)
+                    
+                    ## add the count of indels to the original gwas count
+                    dictWindows[reorderCellNames[count] + gwasNames[count2]] = [a+b for a,b in zip(dictWindows[reorderCellNames[count] + gwasNames[count2]], totalIndelList)]
+                
+                               
+            
+    print("Calculating P-Values: ")
+    for count, item in enumerate(reorderPyranges):
+    
+        if( count != len(reorderPyranges) - 1):
+            print(reorderCellNames[count], end = " - ")
+        else:
+            print(reorderCellNames[count], end = "\n")
+            
+        for count2, item2 in enumerate(gwasPyranges):
+            overlapValue = sum(list(item.coverage(item2).NumberOverlaps))
+            overlapMatrix[count,count2] = overlapValue
+            if indels == True:
+                overlapValue = overlapValue + sum(dictWindows[reorderCellNames[count] + gwasNames[count2] + "IndelOverlap"])
+            
+            ## if there are not indels, use the normal probabilities, if there are indels, use the gwas specific window probabilites
+            if indels == False:
+                out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]]))))
+            elif gwasNonZeroPyranges[count2]:
+                out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]+ gwasNames[count2] + "Prob"]))))
+            else:
+                out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]]))))
+            heatmapMatrix[count,count2] = psinib(overlapValue-1, out1, out2, lowerTail=False)
+        
     try:
-        print("Highest Z-score: " + str(heatmapMatrix.max()))
+        print("Lowest P-Value: " + str(heatmapMatrix.min()))
     except ValueError:
         pass
-        
-    if zscoreRange!=0:
-        print("Subsetting Loci by the Z-score Range Cutoff:")
-        columnsToRemove = []
-        for i in range(len(gwasPyranges)):
-            if np.ptp(heatmapMatrix[:,i]) < zscoreRange:
-                columnsToRemove.append(i)
-        
-        heatmapMatrix = np.delete(heatmapMatrix, columnsToRemove, 1)
-        print("Original Count of Loci Groups: " + str(len(gwasPyranges)))
-        print("Amount of Loci Groups removed using Z-Score Filter: " + str(len(columnsToRemove)))
-        for index in sorted(columnsToRemove, reverse=True):
-            del gwasPyranges[index]
-            del gwasNames[index]
-    ## If more than one loci set is included, make a dendrogram relating them. This is done by using their z-scores with each ATAC-seq set as a vector, and then comparing the distances between these vectors. This is a simple way of comparing their similiarity.
-    if(len(gwasPyranges) > 1 ):
-
-        gwasWeightMatrix = np.zeros((len(gwasPyranges),len(gwasPyranges)))
-
-        ## Creating loci dendrogram
-        print("Creating Loci dendrogram: ")
-        for i in range(len(gwasPyranges)):
-            if( i != len(gwasPyranges) - 1):
-                print("Loci Source " + str(i+1), end = " - ")
-            else:
-                print("Loci Source " + str(i+1), end = "\n")
-
-            for j in range(len(gwasPyranges)):
-                if i > j:
-
-                    weightValue = np.linalg.norm(heatmapMatrix[:,i] - heatmapMatrix[:,j])
-
-                    gwasWeightMatrix[i,j] = weightValue
-
-                    gwasWeightMatrix[j,i] = weightValue
-                
-        ##Create the second figure, the dendrogram of GWAS datasets
-
-        distArray = ssd.squareform(gwasWeightMatrix) 
-        plt.figure(figsize=(16, 10))
-        Z2 = scipy.cluster.hierarchy.linkage(distArray, method='single', metric='euclidean')
-        dn2 = dendrogram(Z2, labels=gwasNames, orientation = "top", leaf_rotation = 90)
-        plt.savefig(outputLocation + '/loci_dendrogram.pdf', bbox_inches = "tight")
+    try:
+        if heatmapMatrix.max() > 1:
+            print("P-Value Greater Than 1 Found. note: Sinib sometimes uses a statistical approximation of a p-value for non convergent cases, this can allow for impossible p-values.")
+    except ValueError:
+        pass
     
-        
-    
-        newHeatMatrix = heatmapMatrix[:,leaves_list(Z2)]
-        ax = sns.heatmap(newHeatMatrix, cmap="YlGnBu")
-        plt.savefig(outputLocation + '/zscore_heatmap.pdf', bbox_inches = "tight")
-    
-    else:
-        
-        print("You have only included one loci set, this will omit the loci dendrogram")
-    
-        newHeatMatrix = heatmapMatrix
-        ax = sns.heatmap(newHeatMatrix, cmap="YlGnBu",annot=True)
-        plt.savefig(outputLocation + '/zscore_heatmap.pdf', bbox_inches = "tight")
+
+    newHeatMatrix = heatmapMatrix
+    newOverlapMatrix = overlapMatrix
+    ax = sns.heatmap(newHeatMatrix, cmap="YlGnBu",annot=True,xticklabels=gwasNames)
+    ax.xaxis.set_ticks_position('top')
+    ax.xaxis.set_label_position('top')
+    plt.xticks(rotation=90)
+    plt.savefig(outputLocation + '/pvalues_heatmap.pdf', bbox_inches = "tight")
     
     ## Create the final figure
     figure, axis = plt.subplots(2, 2, figsize=(40, 30))
-    sns.heatmap(newHeatMatrix, cmap="YlGnBu", cbar=False, ax=axis[1, 1])
+    sns.heatmap(newHeatMatrix, cmap="YlGnBu", cbar=False, ax=axis[1, 1],xticklabels=gwasNames)
+    axis[1, 1].xaxis.set_ticks_position('top')
+    axis[1, 1].xaxis.set_label_position('top')
+    plt.xticks(rotation=90)
     sns.heatmap(newHeatMatrix, cmap="YlGnBu", annot=True, ax=axis[0, 0])
-    if(len(gwasPyranges) > 1 ):
-        dendrogram(Z2, labels=gwasNames, orientation = "top", leaf_rotation = 90, ax=axis[0, 1])
-    else:
-        axis[0, 1].text(0.1, 0.5, gwasNames[0], horizontalalignment='center', verticalalignment='bottom', transform=axis[0, 1].transAxes)
-        axis[0, 1].grid(False)
-        axis[0, 1].axis('off')
+    
+    axis[0, 1].grid(False)
+    axis[0, 1].axis('off')
     if len(dataFrameList) > 1:
         dendrogram(Z,  labels=cellNames, orientation = "left", ax=axis[1, 0])
     else:
@@ -523,14 +688,174 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     axis[1, 1].margins(x=0)
     plt.savefig(outputLocation + '/complete_figure.pdf', bbox_inches = "tight")
     
-    ##save the matrix of z-scores in case they want to do something else with the formatting
+    ##save the matrix of p-values in case they want to do something else with the formatting
     
     newHeatFrame = pd.DataFrame(newHeatMatrix)
-    newHeatFrame.columns = [gwasNames[i] for i in leaves_list(Z2)]
-    newHeatFrame.index = reorderCellNames
+    newHeatFrame.columns = gwasNames
+    if len(dataFrameList) > 1:
+        newHeatFrame.index = reorderCellNames
+    else:
+        newHeatFrame.index = cellNames
 
-    newHeatFrame.to_csv(outputLocation + '/zscore_matrix.txt',sep='\t')
+    newHeatFrame.to_csv(outputLocation + '/pvalue_matrix.txt',sep='\t')
+    
+    ## save the matrix of overlaps count in case they want to do something else with the formatting
+    
+    newOverlapFrame = pd.DataFrame(newOverlapMatrix)
+    newOverlapFrame.columns = gwasNames
+    if len(dataFrameList) > 1:
+        newOverlapFrame.index = reorderCellNames
+    else:
+        newOverlapFrame.index = cellNames
+    
+    ## save the matrix of expected counts in case this information is desired
 
+    newOverlapFrame.to_csv(outputLocation + '/overlap_count_matrix.txt',sep='\t')
+    
+    
+    ##print a file containing every overlap together as well as a file with the cell counts of every overlap
+    if saveOverlap != False:
+        print("Creating the master count file:")
+        fullSave = pd.DataFrame()
+        
+        for filename in glob.glob(outputLocation + '/Overlaps' + "/" + '*.txt'):
+        
+            loopFrame = pd.read_csv(filename, sep="\t")
+            fullSave = pd.concat([fullSave, loopFrame])
+        
+        groupedSave = fullSave.groupby(['Chromosome', 'Start', 'End', 'Cell_Name', 'Loci_Name']).agg('sum')
+        fullCount = groupedSave.pivot_table(index = ['Chromosome', 'Start', 'End', 'Loci_Name'], aggfunc ='size')
+        fullCount = fullCount.reset_index()
+        fullCount.columns.values[4] = "Count"
+        fullCount["Count_Ratio"] = fullCount["Count"]/len(cellNames)
+        
+        fullCount.to_csv(outputLocation + '/Overlaps/Complete/' + 'Complete_Counts' + '.txt', sep='\t', index=False)
+        
+        fullSave = fullSave.sort_values(by=['Chromosome', 'Start'])
+        fullSave.to_csv(outputLocation + '/Overlaps/Complete/' + 'Complete_Overlaps' + '.txt', sep='\t', index=False)
+
+## Sinib Package Functions
+## translated from R to Python from: https://github.com/boxiangliu/sinib
+
+def q(u,p):
+    return([(i * math.exp(u)) / (1 - i + i * math.exp(u)) for i in p])
+
+def K(u,n,p):
+    return(sum([a*math.log(1-b+b*math.exp(u)) for a,b in zip(n,p)]))
+    
+def Kp(u,n,p):
+    return(sum([a*b for a,b in zip(n,q(u,p))]))
+    
+def Kpp(u,n,p):
+    q2=q(u,p)
+    return(sum([a*b*(1-b) for a,b in zip(n,q2)]))
+    
+def Kppp(u,n,p):
+    q2=q(u,p)
+    return(sum([a*b*(1-b)*(1-2*b) for a,b in zip(n,q2)]))
+    
+def Kpppp(u,n,p):
+    q2=q(u,p)
+    return(sum([a*b*(1-b)*(1-6*b*(1-b)) for a,b in zip(n,q2)]))
+
+def saddlepoint(u,n,p,s):
+    return(Kp(u,n,p)-s)
+
+def w(u,n,p):
+    K2=K(u,n,p)
+    Kp2=Kp(u,n,p)
+    return(np.sign(u)*math.sqrt(2*u*Kp2-2*K2))
+
+def u1(u,n,p):
+    Kpp2=Kpp(u,n,p)
+    return((1-math.exp(-u))*math.sqrt(Kpp2))
+
+def p3(u,n,p,s,mu):
+    w2=w(u,n,p)
+    u12=u1(u,n,p)
+    if ((u12==0.0) or (s==mu)):
+        Kpp0=sum([a*b*(1-b) for a,b in zip(n,p)])
+        Kppp0=sum([a*b*(1-b)*(1-2*b) for a,b in zip(n,p)])
+        return(1/2-(2*np.pi)**(-1/2)*((1/6)*Kppp0*Kpp0**(-3/2)-(1/2)*Kpp0**(-1/2)))
+        
+    else:
+        return(1-norm.cdf(w2)-norm.pdf(w2)*(1/w2-1/u12))
+    
+    
+def u2(u,n,p):
+    return(u*math.sqrt(Kpp(u,n,p)))
+
+def k3(u,n,p):
+    return(Kppp(u,n,p)*Kpp(u,n,p)**(-3/2))
+
+def k4(u,n,p):
+    return(Kpppp(u,n,p)*Kpp(u,n,p)**(-2))
+
+def p4(u,n,p,s,mu):
+    
+    u2b=u2(u,n,p)
+    k3b=k3(u,n,p)
+    k4b=k4(u,n,p)
+    wb=w(u,n,p)
+    p3b=p3(u,n,p,s,mu)
+    u1b=u1(u,n,p)
+    if ((u1b==0) or (s==mu)):
+        return(p3b)
+    else:
+        return(p3b-norm.pdf(wb)*((1/u2b)*((1/8)*k4b-(5/24)*k3b**2)-1/(u2b**3)-k3b/(2*u2b**2)+1/wb**3))
+
+def calc_p4(s, n, p, mu):
+    if (s == sum(n)):
+        p4b=numpy.prod([a**b for a,b in zip(p,n)])
+    else:
+        test = root(lambda x: saddlepoint(x,n,p,s), 0)
+        u_hat = test.x[0]
+        if not test.success:
+            n_trial=100000
+            n_binom=len(p)
+            mat = np.random.binomial(n, p, (n_trial, n_binom)).T
+            
+            S = np.sum(mat,axis=0)
+            counterTemp = 0
+            s = [s]*len(S)
+            for l1,l2 in zip(S,s):
+                if l1 >= l2:
+                    counterTemp = counterTemp + 1
+            p4_ = counterTemp/len(S)
+        else:
+            p4_=p4(u_hat,n,p,s,mu)
+            
+    return(p4_)
+            
+def psinib(q,size,prob,lowerTail=True,logP=False):
+
+    if(not all(isinstance(x, int) for x in size)):
+        sys.exit('Non-integer values were used for size values given to psinib')
+    if not all(isinstance(x, int) for x in size):
+        n = [int(i) for i in size]
+    else:
+        n = [int(i) for i in size]
+    
+    p = [float(i) for i in prob]
+    s = int(q)
+                 
+    mu = sum([a*b for a,b in zip(n,p)])
+    
+    p4b = calc_p4(s+1,n,p, mu)
+    
+    if(lowerTail):
+        if (logP):
+            return(np.log(1-p4b))
+        else:
+            return(1-p4b)
+        
+    else:
+        if(logP):
+            return(np.log(p4b))
+        else:
+            return(p4b)
+
+## Main Function which parses arguments and returns values
     
 def main():
     
@@ -556,9 +881,11 @@ def main():
                         help='a txt file containing a set of regions that you want to subset each ATAC region by, for example a set of regions around the TSSs of genes of interest. This will reduce the ATAC regions to just those that overlap with this set of regions' )
     parser.add_argument('-p', action='store_true',
                         help='a flag which will save the overlapping LOCI for every single cell type for every single loci group as an independant file in a subfolder in the output, this is by default false' )
-    parser.add_argument('-z', '--zcoreRangeCutoff',  default=0, required = False, type=int,
-                        help='a cutoff value for selecting which loci groups to keep, after calculating the zscore enrichment for each loci for each given atac-seq set, only loci groups with a zscore range (max-min) equal or greater to this cutoff will be kept. This can be useful for subsetting large groups of loci data into only those which have interesting insights, or unique cell enrichments.')
+                        
+    parser.add_argument('-w', '--windowSize',  default=100000, required = False, type=int,
+                        help='Size of the window you would like to create around each loci to make the statistical comparison for enrichment')
+                        
 
     args = parser.parse_args()
 
-    gaiaAssociation(args.cellRegion, args.loci, args.chrom, args.output, args.peakUniqueness, args.lociCutoff, args.specificLoci, args.maskRegion, args.p, args.zcoreRangeCutoff)
+    gaiaAssociation(args.cellRegion, args.loci, args.chrom, args.output, args.peakUniqueness, args.lociCutoff, args.specificLoci, args.maskRegion, args.p, args.windowSize)
