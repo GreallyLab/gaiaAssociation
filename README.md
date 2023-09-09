@@ -30,13 +30,28 @@ gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyrang
 		
 ## Install gaiaAssociation
 	
-		[Temporary]
 ### PyPi
+
+#### For Command Line:
 
 To install gaiaAssociation for pypi, run a pip command to install it from the pypi distribution archive
 
-	pip install -i https://test.pypi.org/simple/ gaiaAssociation==0.1.0
-  
+	pip install gaiaAssociation
+
+ If you wish to use gaiaAssociation within a jupyter notebook or within a python script or notebook of your choice, then install using pip:
+
+ 	!pip install gaiaAssociation
+
+#### For Python
+
+Then, you will want to import the main function into your workspace
+
+	from gaiaAssociation.gaiaAssociation import gaiaAssociation
+
+This will allow you to use gaia inline as a python function:
+
+	gaiaAssociation("User/OCRfiles", "/User/lociFiles", "/User/chrsize.csv", "/User/Output", lociSelection = "/Users/lociGroups.tsv", windowSize = 10000)
+
 ### Github
 
 You can also download the source package from this github repository
