@@ -7,7 +7,7 @@
 
 
 ## Overview:
-Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, rare variants) to detect cell-specific enrichment of loci.
+Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, rare variants, GWAS) to detect cell-specific enrichment of loci.
 
 ## Guide:
 
