@@ -30,7 +30,7 @@ from scipy.stats import norm
 
 
 ##Primary function for associating ATAC and GWAS
-def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, uniqueCount=0, lociCutoff=0, lociSelection = 0, subsettingRegion=0, saveOverlap = False, windowSize = 100000):
+def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, uniqueCount=0, lociCutoff=0, lociSelection = 0, subsettingRegion=0, windowSize = 100000):
         
     ## ensure all the given locations and files are accesible and real
     if not os.path.exists(atacLocation):
@@ -492,12 +492,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     ## create the chromosome ratios for every atac-seq set
     chromSize = pd.read_csv(chromosomeSize, thousands=',')  
     chromSize = chromSize.sort_values(by=['Chromosome'])
-        
-    ##if saveOverlap flag is sent, then make sure we have a subfolder to save them to, as well as a sub-sub folder to save the master count file in
-    if saveOverlap != False:
-        if not os.path.exists(outputLocation + '/Overlaps'):
-            os.mkdir(outputLocation + '/Overlaps')
-            os.mkdir(outputLocation + '/Overlaps/Complete')
+
         
     ##create weight matrix
 
@@ -712,27 +707,6 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
 
     newOverlapFrame.to_csv(outputLocation + '/overlap_count_matrix.txt',sep='\t')
     
-    
-    ##print a file containing every overlap together as well as a file with the cell counts of every overlap
-    if saveOverlap != False:
-        print("Creating the master count file:")
-        fullSave = pd.DataFrame()
-        
-        for filename in glob.glob(outputLocation + '/Overlaps' + "/" + '*.txt'):
-        
-            loopFrame = pd.read_csv(filename, sep="\t")
-            fullSave = pd.concat([fullSave, loopFrame])
-        
-        groupedSave = fullSave.groupby(['Chromosome', 'Start', 'End', 'Cell_Name', 'Loci_Name']).agg('sum')
-        fullCount = groupedSave.pivot_table(index = ['Chromosome', 'Start', 'End', 'Loci_Name'], aggfunc ='size')
-        fullCount = fullCount.reset_index()
-        fullCount.columns.values[4] = "Count"
-        fullCount["Count_Ratio"] = fullCount["Count"]/len(cellNames)
-        
-        fullCount.to_csv(outputLocation + '/Overlaps/Complete/' + 'Complete_Counts' + '.txt', sep='\t', index=False)
-        
-        fullSave = fullSave.sort_values(by=['Chromosome', 'Start'])
-        fullSave.to_csv(outputLocation + '/Overlaps/Complete/' + 'Complete_Overlaps' + '.txt', sep='\t', index=False)
 
 ## Sinib Package Functions
 ## translated from R to Python from: https://github.com/boxiangliu/sinib
@@ -879,8 +853,6 @@ def main():
                         help='a txt file with the specific loci phenotype you would like to use. This can be very helpful if using a large loci set with with many phenotypes, and you want to sort by more than just loci count.' )
     parser.add_argument('-m', '--maskRegion',default=0, required = False,
                         help='a txt file containing a set of regions that you want to subset each ATAC region by, for example a set of regions around the TSSs of genes of interest. This will reduce the ATAC regions to just those that overlap with this set of regions' )
-    parser.add_argument('-p', action='store_true',
-                        help='a flag which will save the overlapping LOCI for every single cell type for every single loci group as an independant file in a subfolder in the output, this is by default false' )
                         
     parser.add_argument('-w', '--windowSize',  default=100000, required = False, type=int,
                         help='Size of the window you would like to create around each loci to make the statistical comparison for enrichment')
