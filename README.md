@@ -12,7 +12,7 @@ Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci set
 
 ### Installing Python and Pip:
 
-To use gaiaAssociation as a command line tool, the user will need python and pip installed onto their computer. To install python you can follow the instructions for your particular operating system given by Python:
+To use gaiaAssociation as a command line tool or as a python library, the user will need python and pip installed onto their computer. To install python you can follow the instructions for your particular operating system given by Python:
 
  https://www.python.org/downloads/
 
@@ -24,7 +24,7 @@ The above link will also help if you need to upgrade or update your pip installa
 
 ### Installing Required Libraries
 		
-gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyranges, seaborn, matplotlib, and setuptools. Each package can be downloaded using pip, for example:
+gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyranges, seaborn, matplotlib, and setuptools. When installing gaiaAssociation through pip it will attempt to resolve these dependencies and install the necceassary versions. If this fails, each package can be downloaded using pip, for example:
 
     pip install scipy
 		
@@ -32,7 +32,7 @@ gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyrang
 	
 ### PyPi
 
-#### For Command Line:
+#### For Command Line Usage:
 
 To install gaiaAssociation for pypi, run a pip command to install it from the pypi distribution archive
 
@@ -42,7 +42,7 @@ To install gaiaAssociation for pypi, run a pip command to install it from the py
 
  	!pip install gaiaAssociation
 
-#### For Python
+#### For Python Usage:
 
 Then, you will want to import the main function into your workspace
 
@@ -56,11 +56,9 @@ This will allow you to use gaia inline as a python function:
 
 You can also download the source package from this github repository
 
-
 From the location of this newly installed copy of the gaiaAssociation repository, run the setup command
 
- python setup.py install
-
+	python setup.py install
 
 ## Using gaiaAssociation:
 
@@ -89,10 +87,16 @@ Output Folder: The folder location you want the results to be output into.
 
 	-o, --output (either flag will work)
 
-A default run will therefore look like:
+A default run on the command line will therefore look like:
 
 ```
 gaia -a user/documents/atac -g user/documents/loci -c user/chrom/chrsize.csv -o user/documents/output
+```
+
+A default run on in python will look like:
+
+```
+gaiaAssociation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", user/documents/output")
 ```
 
 #### Optional Arguments
@@ -109,7 +113,7 @@ Loci Cutoff: a loci cutoff value, when given gaia will only consider loci groups
   -l, --lociCutoff
 ```
 
-Specific Loci: a txt file with the specific loci groups you would like to use. This can be very helpful if using a large loci set with with many phenotypes, and you want to sort by more than just loci count. (e.g. a complete database may include hundreds of loci groups, but you would like to manually select a subgroup of interest)
+Specific Loci: a tsv file with the specific loci groups you would like to use. This can be very helpful if using a large loci set with with many phenotypes, and you want to sort by more than just loci count. If the tsv file includes multiple columns, say "STUDY", and "DISEASE/TRAIT", then the loci will be subset specifically by both columns. So only those that match every value within a row will be considered as a group.
 
 ```
   -s, --specificLoci
