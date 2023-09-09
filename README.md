@@ -39,11 +39,15 @@ To install gaiaAssociation for pypi, run a pip command to install it from the py
 
 	pip install gaiaAssociation
 
+To get info on how to run from the command line run:
+
+	gaia --help
+
+ #### For Python Usage:
+
  If you wish to use gaiaAssociation within a jupyter notebook or within a python script or notebook of your choice, then install using pip:
 
  	!pip install gaiaAssociation
-
-#### For Python Usage:
 
 Then, you will want to import the main function into your workspace
 
@@ -61,13 +65,15 @@ From the location of this newly installed copy of the gaiaAssociation repository
 
 	python setup.py install
 
+Gaia will now be runnable from the command line as described above.
+
 ## Using gaiaAssociation:
 
 To check your installation and to get basic information on using gaiaAssociation type this command into your terminal.
 
 	gaia --help
 
-It should print out useful information about each variable and the flag to associate with each argument. gaiaAssocation has four required arguments, and six optional arguments. The four required arguments, which define a basic run are:
+It should print out useful information about each variable and the flag to associate with each argument. gaiaAssocation has four required arguments, and five optional arguments. The four required arguments, which define a basic run are:
 
 #### Required Arguments
 
@@ -132,8 +138,14 @@ Window Size: an integer given to represent the size of windows the user would li
   -w, --windowSize
 ```
 
-A run using these flags will therfore look like
+A run from the command line using these flags will therfore look like
 
 ```
-gaia -a user/documents/atac -g user/documents/loci -c user/chrom/chrsize.csv -o user/documents/output -p -l 2000 -z 20 -u 10 -m user/documents/mask.txt
+gaia -a user/documents/atac -g user/documents/loci -c user/chrom/chrsize.csv -o user/documents/output -l 2000 -u 10 -m user/documents/mask.txt -w 1000000
+```
+
+Within a python file it will look like:
+
+```
+gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", "user/documents/output", lociCutoff = 2000, peakUniqueness = 10, maskRegion = "user/documents/mask.txt", windowSize = 1000000)
 ```
