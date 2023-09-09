@@ -860,4 +860,4 @@ def main():
 
     args = parser.parse_args()
 
-    gaiaAssociation(args.cellRegion, args.loci, args.chrom, args.output, args.peakUniqueness, args.lociCutoff, args.specificLoci, args.maskRegion, args.p, args.windowSize)
+    gaiaAssociation(args.cellRegion, args.loci, args.chrom, args.output, args.peakUniqueness, args.lociCutoff, args.specificLoci, args.maskRegion, args.windowSize)
