@@ -1,5 +1,6 @@
 # Gaia Association
 ## Version 0.5.0
+## Geally Lab
 ## Samuel Rosean
 
 ****
@@ -83,7 +84,7 @@ Chromosome Size: The location of a chromosome size file stored in a .csv format.
 
 	-c, --chrom (either flag will work)
 
-Output Folder: The folder location you want the results to be output into.
+Output Folder: The folder location you want the results to be output into. If this folder does not already exist gaia will attempt to make it. If it does not have the permissions to do so it will exist and the user will have to run it with folder creating permissions, or they will have to make the folder themselves.
 
 	-o, --output (either flag will work)
 
@@ -125,16 +126,10 @@ Masking Region: a bed file in a a .txt format containing a set of regions that y
   -m, --maskRegion
 ```
 
-Print Loci: a flag which will save the overlapping LOCI for every single cell type for every single loci group as an independant file in a subfolder in the output, this is by default false
+Window Size: an integer given to represent the size of windows the user would like to divide the chromosome into. This method is based on the sinib tool (https://github.com/boxiangliu/sinib), which requires the chromosome be divided into a series of equal length windows to be able to moddle them as a series of binomials. Th default value is 100,000 bp, but this value can be changed to increase specificity or decrease sepcificity. The function of the window size is to only consider the local environment when determing loci enrichment, so consideration should be made to what the user considers local in their particualr context
 
 ```
-  -p
-```
-
-Z-Score Cutoff: a cutoff value for selecting which loci groups to keep after calculating the zscore enrichment for each loci for each given atac-seq set. Only loci groups with a zscore range (max-min) equal or greater to this cutoff will be kept. This can be useful for subsetting large groups of loci data into only those which have interesting insights, or unique cell enrichments.
-
-```
-  -z, --zcoreRangeCutoff
+  -w, --windowSize
 ```
 
 A run using these flags will therfore look like
