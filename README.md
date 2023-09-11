@@ -120,25 +120,25 @@ Loci Cutoff: a loci cutoff value, when given gaia will only consider loci groups
   -l, --lociCutoff
 ```
 
-Specific Loci: a tsv file with the specific loci groups you would like to use. This can be very helpful if using a large loci set with with many phenotypes, and you want to sort by more than just loci count. If the tsv file includes multiple columns, say "STUDY", and "DISEASE/TRAIT", then the loci will be subset specifically by both columns. So only those that match every value within a row will be considered as a group.
+Specific Loci: a tsv file with the specific loci groups you would like to use. This can be very helpful if using a large loci set with with many phenotypes, and you want to sort by more than just loci count. The tsv should have column names which also exist in the loci files, so that gaia can subset the loci based on these column values (e.g. if you have a column in your loci set titled "runs" and you would like to only use run 1, then a tsv with one column "runs" and one row value "1" will accomplish this). If the tsv file includes multiple columns, say "STUDY", and "DISEASE/TRAIT", then the loci set will be subset specifically by both columns at once. So only those that match every value within a row will be considered as a group (e.g. if you subset by "runs" and by "patient", then if only those loci that match both of these values will be considered).
 
 ```
   -s, --specificLoci
 ```
 
-Masking Region: a bed file in a a .txt format containing a set of regions that you want to subset each ATAC region by, for example a set of regions around the TSSs of particular genes of interest. This will reduce the ATAC regions to just those that overlap with this set of regions. This can be used to detect cell-specific + gene-specific enrichment.
+Masking Region: a bed file in a a .txt format containing a set of regions that you want to subset every OCR region by. For example, a set of regions around the TSSs of a list of particular genes. This will reduce the OCR regions to just those that overlap with this given set of regions. This can be used to detect cell-specific + site-specific enrichment differences.
 
 ```
   -m, --maskRegion
 ```
 
-Window Size: an integer given to represent the size of windows the user would like to divide the chromosome into. This method is based on the sinib tool (https://github.com/boxiangliu/sinib), which requires the chromosome be divided into a series of equal length windows to be able to moddle them as a series of binomials. The default value is 100,000 bp, but this value can be changed to increase specificity or decrease sepcificity. The function of the window size is to only consider the local environment when determing loci enrichment, so consideration should be made to what the user considers local in their particualr context
+Window Size: an integer given to represent the size of windows the user would like to divide the chromosome into. This method is based on the sinib tool (https://github.com/boxiangliu/sinib), which requires the chromosome be divided into a series of equal length windows to be able to moddle them as a series of binomials. The default value is 100,000 bp, but this value can be changed to increase specificity or decrease sepcificity. The function of the window size is to only consider the local environment when determing loci enrichment, so consideration should be made to what the user considers local in their particualr context.
 
 ```
   -w, --windowSize
 ```
 
-A run from the command line using these flags will therfore look like
+A run from the command line using these flags will therfore look like:
 
 ```
 gaia -a user/documents/atac -g user/documents/loci -c user/chrom/chrsize.csv -o user/documents/output -l 2000 -u 10 -m user/documents/mask.txt -w 1000000
