@@ -7,7 +7,7 @@
 
 
 ## Overview:
-Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, rare variants, GWAS) to detect cell-specific enrichment of loci.
+Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, rare variants, GWAS) to detect cell-specific enrichment of loci. By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window were loci are found, wherein the probability is determined by the proportion of the window covered by open chromatin regions. These non-identical binomial variables are then summed utilizing the method developed by  Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
 ## Guide:
 
