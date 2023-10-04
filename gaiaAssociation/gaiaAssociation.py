@@ -657,7 +657,6 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     
 
     newHeatMatrix = heatmapMatrix
-    newOverlapMatrix = overlapMatrix
     ax = sns.heatmap(newHeatMatrix, cmap="YlGnBu",annot=True,xticklabels=gwasNames)
     ax.xaxis.set_ticks_position('top')
     ax.xaxis.set_label_position('top')
@@ -693,19 +692,6 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         newHeatFrame.index = cellNames
 
     newHeatFrame.to_csv(outputLocation + '/pvalue_matrix.txt',sep='\t')
-    
-    ## save the matrix of overlaps count in case they want to do something else with the formatting
-    
-    newOverlapFrame = pd.DataFrame(newOverlapMatrix)
-    newOverlapFrame.columns = gwasNames
-    if len(dataFrameList) > 1:
-        newOverlapFrame.index = reorderCellNames
-    else:
-        newOverlapFrame.index = cellNames
-    
-    ## save the matrix of expected counts in case this information is desired
-
-    newOverlapFrame.to_csv(outputLocation + '/overlap_count_matrix.txt',sep='\t')
     
 
 ## Sinib Package Functions
