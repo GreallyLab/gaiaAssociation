@@ -1,6 +1,6 @@
 # Gaia Association
 ## Version 0.5.0
-## Geally Lab
+## Greally Lab
 ## Samuel Rosean
 
 ****
