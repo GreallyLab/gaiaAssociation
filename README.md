@@ -77,7 +77,7 @@ It should print out useful information about each variable and the flag to assoc
 
 #### Required Arguments
 
-ATAC Folder: the folder location of the ATAC bed files stored in .txt format. The first three columns should be labeled “Chromosome”, “Start”, and “End” in that order.
+OCR Folder: the folder location of the OCR bed files stored in .txt format. The first three columns should be labeled “Chromosome”, “Start”, and “End” in that order.
 
 	-a, --atac  (either flag will work)
 
@@ -108,7 +108,7 @@ gaiaAssociation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 
 #### Optional Arguments
 
-Peak Uniqueness: a cutoff value for ATAC uniqueness (e.g. if given 12, then any atac peak found in more than 12 atac sets will be removed from all of them) - by default uniqueness is not considered).
+Peak Uniqueness: a cutoff value for OCR uniqueness (e.g. if given 12, then any atac peak found in more than 12 atac sets will be removed from all of them) - by default uniqueness is not considered).
 
 ```
   -u, --peakUniqueness
