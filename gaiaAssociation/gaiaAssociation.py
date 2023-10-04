@@ -683,7 +683,6 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     plt.savefig(outputLocation + '/complete_figure.pdf', bbox_inches = "tight")
     
     ##save the matrix of p-values in case they want to do something else with the formatting
-    
     newHeatFrame = pd.DataFrame(newHeatMatrix)
     newHeatFrame.columns = gwasNames
     if len(dataFrameList) > 1:
@@ -692,6 +691,22 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         newHeatFrame.index = cellNames
 
     newHeatFrame.to_csv(outputLocation + '/pvalue_matrix.txt',sep='\t')
+    
+    
+    ##save overlap Counts
+    newOverlapMatrix = overlapMatrix
+    
+    ## save the matrix of overlaps count in case they want to do something else with the formatting
+    newOverlapFrame = pd.DataFrame(newOverlapMatrix)
+    newOverlapFrame.columns = gwasNames
+    if len(dataFrameList) > 1:
+        newOverlapFrame.index = reorderCellNames
+    else:
+        newOverlapFrame.index = cellNames
+
+    ## save the matrix of overlap counts in case this information is desired
+    newOverlapFrame.to_csv(outputLocation + '/overlap_count_matrix.txt',sep='\t')
+
     
 
 ## Sinib Package Functions
