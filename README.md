@@ -7,10 +7,9 @@ of loci in cell type-specific open chromatin regions (OCRs) in the genome. Given
 
 ![alt text](https://github.com/samrosean/images/blob/main/logo_with_border_transparent.png)
 
-# Author/Support
+## Author/Support
 
-Samuel Rosean, samuel.rosean@einsteinmed.edu
-https://github.com/samrosean
+Samuel Rosean, samuel.rosean@einsteinmed.edu --- https://github.com/samrosean
 
 ****
 
