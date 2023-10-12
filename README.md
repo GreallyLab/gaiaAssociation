@@ -1,5 +1,9 @@
 # Gaia Association
 
+## Overview:
+
+The gaiaAssociation package performs Regulatory LandscapeEnrichment Analysis (RLEA). RLEA tests for enrichment of sets
+of loci in cell type-specific open chromatin regions (OCRs) in the genome. Given chromatin accessibility data (e.g. ATAC-seq, DNase-seq) and loci sets (e.g. de-novo mutations, rare variants, GWAS) gaiaAssociation will detect any cell-specific enrichment of loci.
 
 ![alt text](https://github.com/samrosean/images/blob/main/logo_with_border_transparent.png)
 
@@ -10,9 +14,6 @@ https://github.com/samrosean
 
 ****
 
-
-## Overview:
-Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, rare variants, GWAS) to detect cell-specific enrichment of loci. By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window were loci are found, wherein the probability is determined by the proportion of the window covered by open chromatin regions. These non-identical binomial variables are then summed utilizing the method developed by  Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
 ## Guide:
 
@@ -155,5 +156,9 @@ Within a python file it will look like:
 gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", "user/documents/output", lociCutoff = 2000, peakUniqueness = 10, maskRegion = "user/documents/mask.txt", windowSize = 1000000)
 ```
 
+
+### How Gaia works:
+
+By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window were loci are found, wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window. The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. These non-identical binomial variables are then summed utilizing the method developed by  Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
 ### Version 1.0.0
