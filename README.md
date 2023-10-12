@@ -4,7 +4,7 @@
 ## Samuel Rosean
 
 
-![alt text](https://github.com/samrosean/images/blob/main/Untitled%20design(2).png)
+![alt text](https://github.com/samrosean/images/blob/main/logo_with_border_transparent.png)
 
 
 ****
