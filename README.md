@@ -14,10 +14,7 @@ https://github.com/samrosean
 
 ****
 
-
-## Guide:
-
-### Step 0: Installing Python and Pip:
+## Step 0: Installing Python and Pip:
 
 To use gaiaAssociation as a command line tool or as a python library, the user will need python and pip installed onto their computer. To install python you can follow the instructions for your particular operating system given by Python:
 
