@@ -1,11 +1,12 @@
 # Gaia Association
-## Version 0.6.0
-## Greally Lab
-## Samuel Rosean
 
 
 ![alt text](https://github.com/samrosean/images/blob/main/logo_with_border_transparent.png)
 
+# Author/Support
+
+Samuel Rosean, samuel.rosean@einsteinmed.edu
+https://github.com/samrosean
 
 ****
 
@@ -153,3 +154,6 @@ Within a python file it will look like:
 ```
 gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", "user/documents/output", lociCutoff = 2000, peakUniqueness = 10, maskRegion = "user/documents/mask.txt", windowSize = 1000000)
 ```
+
+
+### Version 1.0.0
