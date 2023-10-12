@@ -17,7 +17,7 @@ https://github.com/samrosean
 
 ## Guide:
 
-### Installing Python and Pip:
+### Step 0: Installing Python and Pip:
 
 To use gaiaAssociation as a command line tool or as a python library, the user will need python and pip installed onto their computer. To install python you can follow the instructions for your particular operating system given by Python:
 
@@ -35,7 +35,7 @@ gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyrang
 
     pip install scipy
 		
-## Install gaiaAssociation
+## Step 1: Install gaiaAssociation
 	
 ### PyPi
 
@@ -73,7 +73,7 @@ From the location of this newly installed copy of the gaiaAssociation repository
 
 Gaia will now be runnable from the command line as described above.
 
-## Using gaiaAssociation:
+## Step 2: Using gaiaAssociation:
 
 To check your installation and to get basic information on using gaiaAssociation type this command into your terminal.
 
@@ -157,7 +157,7 @@ gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 ```
 
 
-### How Gaia works:
+## How Gaia works:
 
 By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window were loci are found, wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window. The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. These non-identical binomial variables are then summed utilizing the method developed by  Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
