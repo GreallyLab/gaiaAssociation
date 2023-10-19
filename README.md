@@ -155,6 +155,6 @@ gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 
 ## How Gaia works:
 
-By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window where loci are found, wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window. The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. These non-identical binomial variables are then summed utilizing the method developed by  Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
+By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window where loci are found (wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window). The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. The non-identical binomial variables are summed utilizing the method developed by Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
 ### Version 1.0.0
