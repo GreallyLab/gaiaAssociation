@@ -83,7 +83,7 @@ OCR Folder: the folder location of the OCR bed files stored in .txt format. The 
 
 	-a, --atac  (either flag will work)
 
-Loci Folder: the folder location of the loci files stored in .tsv format.
+Loci Folder: the folder location of the loci files stored in .tsv and/or .csv format.
 These files can be formatted differently depending on the type of loci being compared. If these loci are a single base pair long then only two columns are required: “CHR_POS” and “CHR_ID” which refer to its genome location and its chromosome name respectively. If these are variably sized loci you can include “Start” and “End” instead of “CHR_POS”. If you would like to give specific labels to each loci set, since by default we will name the loci set by their filename, you can include a column titled "DISEASE/TRAIT", which allows for multiple loci sets to be analyzed within one file.
 
 	-g , --loci (either flag will work)
@@ -153,7 +153,7 @@ gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 ```
 
 
-## How Gaia works:
+## How Gaia Works:
 
 By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window where loci are found (wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window). The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. The non-identical binomial variables are summed utilizing the method developed by Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
