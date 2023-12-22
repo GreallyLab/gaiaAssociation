@@ -1,17 +1,19 @@
 # Gaia Association
-## Version 0.5.0
-## Greally Lab
-## Samuel Rosean
+
+## Overview:
+
+The gaiaAssociation package performs Regulatory LandscapeEnrichment Analysis (RLEA). RLEA tests for enrichment of sets
+of loci in cell type-specific open chromatin regions (OCRs) in the genome. Given chromatin accessibility data (e.g. ATAC-seq, DNase-seq) and loci sets (e.g. de-novo mutations, rare variants, GWAS) gaiaAssociation will detect any cell-specific enrichment of loci.
+
+![alt text](https://github.com/samrosean/images/blob/main/logo_with_border_transparent.png)
+
+## Author/Support
+
+Samuel Rosean, samuel.rosean@einsteinmed.edu --- https://github.com/samrosean
 
 ****
 
-
-## Overview:
-Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, rare variants, GWAS) to detect cell-specific enrichment of loci. By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window were loci are found, wherein the probability is determined by the proportion of the window covered by open chromatin regions. These non-identical binomial variables are then summed utilizing the method developed by  Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
-
-## Guide:
-
-### Installing Python and Pip:
+## Step 0: Installing Python and Pip:
 
 To use gaiaAssociation as a command line tool or as a python library, the user will need python and pip installed onto their computer. To install python you can follow the instructions for your particular operating system given by Python:
 
@@ -29,13 +31,13 @@ gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyrang
 
     pip install scipy
 		
-## Install gaiaAssociation
+## Step 1: Install gaiaAssociation
 	
 ### PyPi
 
 #### For Command Line Usage:
 
-To install gaiaAssociation for pypi, run a pip command to install it from the pypi distribution archive
+To install gaiaAssociation from pypi, run a pip command to install it from the pypi distribution archive
 
 	pip install gaiaAssociation
 
@@ -67,7 +69,7 @@ From the location of this newly installed copy of the gaiaAssociation repository
 
 Gaia will now be runnable from the command line as described above.
 
-## Using gaiaAssociation:
+## Step 2: Using gaiaAssociation:
 
 To check your installation and to get basic information on using gaiaAssociation type this command into your terminal.
 
@@ -149,3 +151,10 @@ Within a python file it will look like:
 ```
 gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", "user/documents/output", lociCutoff = 2000, peakUniqueness = 10, maskRegion = "user/documents/mask.txt", windowSize = 1000000)
 ```
+
+
+## How Gaia works:
+
+By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window where loci are found (wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window). The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. The non-identical binomial variables are summed utilizing the method developed by Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
+
+### Version 1.0.0
