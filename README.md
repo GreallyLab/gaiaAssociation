@@ -53,11 +53,11 @@ To get info on how to run from the command line run:
 
 Then, you will want to import the main function into your workspace
 
-	from gaiaAssociation.gaiaAssociation import gaiaAssociation
+	import gaiaAssociation.gaiaAssociation
 
 This will allow you to use gaia inline as a python function:
 
-	gaiaAssociation("User/OCRfiles", "/User/lociFiles", "/User/chrsize.csv", "/User/Output", lociSelection = "/Users/lociGroups.tsv", windowSize = 10000)
+	gaiaAssociation.gaiaAssociation.gaiaAssociation("User/OCRfiles", "/User/lociFiles", "/User/chrsize.csv", "/User/Output", lociSelection = "/Users/lociGroups.tsv", windowSize = 10000)
 
 ### Github
 
@@ -71,11 +71,16 @@ Gaia will now be runnable from the command line as described above.
 
 ## Step 2: Using gaiaAssociation:
 
-To check your installation and to get basic information on using gaiaAssociation type this command into your terminal.
+For a complete guide to using gaiaAssociation with a jupyterNotebook, you can see our example notebook and its associated data set at:
+
+[    ]
+
+
+When using gaiaAssociation on the command line you can check your installation and to get basic information on using gaiaAssociation by typing this command into your terminal.
 
 	gaia --help
 
-It should print out useful information about each variable and the flag to associate with each argument. gaiaAssocation has four required arguments, and five optional arguments. The four required arguments, which define a basic run are:
+If correctly installed it should print out useful information about each variable and the flag to associate with each. gaiaAssocation has four required arguments, and five optional arguments. The four required arguments, which define a basic run are:
 
 #### Required Arguments
 
@@ -92,7 +97,7 @@ Chromosome Size: The location of a chromosome size file stored in a .csv format.
 
 	-c, --chrom (either flag will work)
 
-Output Folder: The folder location you want the results to be output into. If this folder does not already exist gaia will attempt to make it. If it does not have the permissions to do so it will exist and the user will have to run it with folder creating permissions, or they will have to make the folder themselves.
+Output Folder: The folder location you want the results to be output into. If this folder does not already exist gaia will attempt to make it. If it does not have the permissions to do so it will exit and the user will have to run it with folder creating permissions, or they will have to make the folder themselves.
 
 	-o, --output (either flag will work)
 
