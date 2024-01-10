@@ -133,7 +133,7 @@ Specific Loci: a tsv file with the specific loci groups you would like to use. T
   -s, --specificLoci
 ```
 
-Masking Region: a bed file in a a .txt format containing a set of regions that you want to subset every OCR region by. For example, a set of regions around the TSSs of a list of particular genes. This will reduce the OCR regions to just those that overlap with this given set of regions. This can be used to detect cell-specific + site-specific enrichment differences.
+Masking Region: a bed file in a .txt format containing a set of regions that you want to subset every OCR region by. For example, a set of regions around the TSSs of a list of particular genes. This will reduce the OCR regions to just those that overlap with this given set of regions. This can be used to detect cell-specific + site-specific enrichment differences.
 
 ```
   -m, --maskRegion
