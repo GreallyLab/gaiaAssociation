@@ -139,7 +139,7 @@ Masking Region: a bed file in a .txt format containing a set of regions that you
   -m, --maskRegion
 ```
 
-Window Size: an integer given to represent the size of windows the user would like to divide the chromosome into. This method is based on the sinib tool (https://github.com/boxiangliu/sinib), which requires the chromosome be divided into a series of equal length windows to be able to model them as a series of binomials. The default value is 100,000 bp, but this value can be changed to increase specificity or decrease sepcificity. The function of the window size is to only consider the local environment when determing loci enrichment, so consideration should be made to what the user considers local in their particualr context.
+Window Size: an integer given to represent the size of windows in bp that the user would like to divide the chromosome into. This method is based on the sinib tool (https://github.com/boxiangliu/sinib), which requires the chromosome be divided into a series of equal length windows to be able to model them as a series of binomials. The default value is 100,000 bp, but this value can be changed to increase specificity or decrease sepcificity. The function of the window size is to only consider the local environment when determing loci enrichment, so consideration should be made to what the user considers local in their particualr context.
 
 ```
   -w, --windowSize
