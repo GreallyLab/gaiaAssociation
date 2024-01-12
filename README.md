@@ -5,6 +5,8 @@
 The gaiaAssociation package performs Regulatory LandscapeEnrichment Analysis (RLEA). RLEA tests for enrichment of sets
 of loci in cell type-specific open chromatin regions (OCRs) in the genome. Given chromatin accessibility data (e.g. ATAC-seq, DNase-seq) and loci sets (e.g. de-novo mutations, rare variants, GWAS) gaiaAssociation will detect any cell-specific enrichment of loci.
 
+A detailed guide and example notebook for using Gaia within a jupyter notebook environment can be found [here](https://github.com/GreallyLab/gaiaAssociation-Example-Guide).
+
 ![alt text](https://github.com/samrosean/images/blob/main/logo_with_border_transparent.png)
 
 ## Author/Support
@@ -46,6 +48,8 @@ To get info on how to run from the command line run:
 	gaia --help
 
  #### For Python Usage:
+ 
+ A detailed guide and example notebook for using Gaia within a jupyter notebook environment can be found [here](https://github.com/GreallyLab/gaiaAssociation-Example-Guide).
 
  If you wish to use gaiaAssociation within a jupyter notebook or within a python script or notebook of your choice, then install using pip:
 
