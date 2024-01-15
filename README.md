@@ -5,6 +5,8 @@
 The gaiaAssociation package performs Regulatory LandscapeEnrichment Analysis (RLEA). RLEA tests for enrichment of sets
 of loci in cell type-specific open chromatin regions (OCRs) in the genome. Given chromatin accessibility data (e.g. ATAC-seq, DNase-seq) and loci sets (e.g. de-novo mutations, rare variants, GWAS) gaiaAssociation will detect any cell-specific enrichment of loci.
 
+A detailed guide and example notebook for using Gaia within a jupyter notebook environment can be found [here](https://github.com/GreallyLab/gaiaAssociation-Example-Guide).
+
 ![alt text](https://github.com/samrosean/images/blob/main/logo_with_border_transparent.png)
 
 ## Author/Support
@@ -46,6 +48,8 @@ To get info on how to run from the command line run:
 	gaia --help
 
  #### For Python Usage:
+ 
+ A detailed guide and example notebook for using Gaia within a jupyter notebook environment can be found [here](https://github.com/GreallyLab/gaiaAssociation-Example-Guide).
 
  If you wish to use gaiaAssociation within a jupyter notebook or within a python script or notebook of your choice, then install using pip:
 
@@ -53,11 +57,11 @@ To get info on how to run from the command line run:
 
 Then, you will want to import the main function into your workspace
 
-	from gaiaAssociation.gaiaAssociation import gaiaAssociation
+	import gaiaAssociation.gaiaAssociation
 
 This will allow you to use gaia inline as a python function:
 
-	gaiaAssociation("User/OCRfiles", "/User/lociFiles", "/User/chrsize.csv", "/User/Output", lociSelection = "/Users/lociGroups.tsv", windowSize = 10000)
+	gaiaAssociation.gaiaAssociation.gaiaAssociation("User/OCRfiles", "/User/lociFiles", "/User/chrsize.csv", "/User/Output", lociSelection = "/Users/lociGroups.tsv", windowSize = 10000)
 
 ### Github
 
@@ -71,11 +75,16 @@ Gaia will now be runnable from the command line as described above.
 
 ## Step 2: Using gaiaAssociation:
 
-To check your installation and to get basic information on using gaiaAssociation type this command into your terminal.
+For a complete guide to using gaiaAssociation with a jupyterNotebook, you can see our example notebook and its associated data set at:
+
+[    ]
+
+
+When using gaiaAssociation on the command line you can check your installation and to get basic information on using gaiaAssociation by typing this command into your terminal.
 
 	gaia --help
 
-It should print out useful information about each variable and the flag to associate with each argument. gaiaAssocation has four required arguments, and five optional arguments. The four required arguments, which define a basic run are:
+If correctly installed it should print out useful information about each variable and the flag to associate with each. gaiaAssocation has four required arguments, and five optional arguments. The four required arguments, which define a basic run are:
 
 #### Required Arguments
 
@@ -83,7 +92,7 @@ OCR Folder: the folder location of the OCR bed files stored in .txt format. The 
 
 	-a, --atac  (either flag will work)
 
-Loci Folder: the folder location of the loci files stored in .tsv format.
+Loci Folder: the folder location of the loci files stored in .tsv and/or .csv format.
 These files can be formatted differently depending on the type of loci being compared. If these loci are a single base pair long then only two columns are required: “CHR_POS” and “CHR_ID” which refer to its genome location and its chromosome name respectively. If these are variably sized loci you can include “Start” and “End” instead of “CHR_POS”. If you would like to give specific labels to each loci set, since by default we will name the loci set by their filename, you can include a column titled "DISEASE/TRAIT", which allows for multiple loci sets to be analyzed within one file.
 
 	-g , --loci (either flag will work)
@@ -92,7 +101,7 @@ Chromosome Size: The location of a chromosome size file stored in a .csv format.
 
 	-c, --chrom (either flag will work)
 
-Output Folder: The folder location you want the results to be output into. If this folder does not already exist gaia will attempt to make it. If it does not have the permissions to do so it will exist and the user will have to run it with folder creating permissions, or they will have to make the folder themselves.
+Output Folder: The folder location you want the results to be output into. If this folder does not already exist gaia will attempt to make it. If it does not have the permissions to do so it will exit and the user will have to run it with folder creating permissions, or they will have to make the folder themselves.
 
 	-o, --output (either flag will work)
 
@@ -128,13 +137,13 @@ Specific Loci: a tsv file with the specific loci groups you would like to use. T
   -s, --specificLoci
 ```
 
-Masking Region: a bed file in a a .txt format containing a set of regions that you want to subset every OCR region by. For example, a set of regions around the TSSs of a list of particular genes. This will reduce the OCR regions to just those that overlap with this given set of regions. This can be used to detect cell-specific + site-specific enrichment differences.
+Masking Region: a bed file in a .txt format containing a set of regions that you want to subset every OCR region by. For example, a set of regions around the TSSs of a list of particular genes. This will reduce the OCR regions to just those that overlap with this given set of regions. This can be used to detect cell-specific + site-specific enrichment differences.
 
 ```
   -m, --maskRegion
 ```
 
-Window Size: an integer given to represent the size of windows the user would like to divide the chromosome into. This method is based on the sinib tool (https://github.com/boxiangliu/sinib), which requires the chromosome be divided into a series of equal length windows to be able to moddle them as a series of binomials. The default value is 100,000 bp, but this value can be changed to increase specificity or decrease sepcificity. The function of the window size is to only consider the local environment when determing loci enrichment, so consideration should be made to what the user considers local in their particualr context.
+Window Size: an integer given to represent the size of windows in bp that the user would like to divide the chromosome into. This method is based on the sinib tool (https://github.com/boxiangliu/sinib), which requires the chromosome be divided into a series of equal length windows to be able to model them as a series of binomials. The default value is 100,000 bp, but this value can be changed to increase specificity or decrease sepcificity. The function of the window size is to only consider the local environment when determing loci enrichment, so consideration should be made to what the user considers local in their particualr context.
 
 ```
   -w, --windowSize
@@ -153,7 +162,7 @@ gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 ```
 
 
-## How Gaia works:
+## How Gaia Works:
 
 By dividing each chromsome into roughly equivalent window sizes, enrichment is modeled as a binomial variable for each window where loci are found (wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window). The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. The non-identical binomial variables are summed utilizing the method developed by Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
