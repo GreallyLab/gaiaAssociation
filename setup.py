@@ -7,7 +7,7 @@ long_description = 'Compare ATAC-seq datasets against loci datasets to see if th
   
 setup(
         name ='gaiaAssociation',
-        version ='0.6.0',
+        version ='1.0.0',
         author ='Samuel Rosean',
         author_email ='samuel.rosean@einsteinmed.edu',
         url ='https://github.com/samrosean/gaiaAssociation',

@@ -499,8 +499,13 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     ##Based on window sizes divide our chromosomes into equal sized chuncks
     windowFrames = []
     for index, row in chromSize.iterrows():
+    
+        ## get the size of this particular chromsome
         chrSize = int(chromSize.at[index, "size in bp"])
+        
+        ## returned the rounded up version of the divided window size (3.01 becomes 4)
         n = math.ceil(chrSize/windowSize)
+        
         windowSizesLoop = []
         zp = n - (chrSize % n)
         pp = chrSize//n
