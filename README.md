@@ -75,9 +75,7 @@ Gaia will now be runnable from the command line as described above.
 
 ## Step 2: Using gaiaAssociation:
 
-For a complete guide to using gaiaAssociation with a jupyterNotebook, you can see our example notebook and its associated data set at:
-
-[    ]
+A detailed guide and example notebook for using Gaia within a jupyter notebook environment can be found [here](https://github.com/GreallyLab/gaiaAssociation-Example-Guide).
 
 
 When using gaiaAssociation on the command line you can check your installation and to get basic information on using gaiaAssociation by typing this command into your terminal.
@@ -160,6 +158,9 @@ Within a python file it will look like:
 ```
 gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", "user/documents/output", lociCutoff = 2000, peakUniqueness = 10, maskRegion = "user/documents/mask.txt", windowSize = 1000000)
 ```
+## Additional Notes
+
+1. Gaia is designed to be run on tsv and csv files in a utf-8 encoding format. Problems may arise from using files encoded in a different format, we recommend you ensure files are saved in this encoder if errors are occuring.
 
 
 ## How Gaia Works:
