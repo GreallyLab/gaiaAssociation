@@ -236,7 +236,10 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     final_columns = ["CHR_ID", "Start", "CHR_POS", "End", "Chromosome", "DISEASE/TRAIT"]
     if lociSelection != 0:
     
-        lociSelectDF=pd.read_csv(lociSelection,sep='\t')
+        if lociSelection[-3:] == "tsv":
+            lociSelectDF=pd.read_csv(lociSelection,sep='\t')
+        elif lociSelection[-3:] == "csv":
+            lociSelectDF=pd.read_csv(lociSelection)
         tempColumnList = lociSelectDF.columns
         final_columns.extend(tempColumnList)
     
@@ -499,8 +502,13 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     ##Based on window sizes divide our chromosomes into equal sized chuncks
     windowFrames = []
     for index, row in chromSize.iterrows():
+    
+        ## get the size of this particular chromsome
         chrSize = int(chromSize.at[index, "size in bp"])
+        
+        ## returned the rounded up version of the divided window size (3.01 becomes 4)
         n = math.ceil(chrSize/windowSize)
+        
         windowSizesLoop = []
         zp = n - (chrSize % n)
         pp = chrSize//n

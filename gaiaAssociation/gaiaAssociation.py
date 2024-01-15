@@ -236,7 +236,10 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     final_columns = ["CHR_ID", "Start", "CHR_POS", "End", "Chromosome", "DISEASE/TRAIT"]
     if lociSelection != 0:
     
-        lociSelectDF=pd.read_csv(lociSelection,sep='\t')
+        if lociSelection[-3:] == "tsv":
+            lociSelectDF=pd.read_csv(lociSelection,sep='\t')
+        elif lociSelection[-3:] == "csv":
+            lociSelectDF=pd.read_csv(lociSelection)
         tempColumnList = lociSelectDF.columns
         final_columns.extend(tempColumnList)
     

@@ -7,7 +7,7 @@ long_description = 'Compare ATAC-seq datasets against loci datasets to see if th
   
 setup(
         name ='gaiaAssociation',
-        version ='1.0.0',
+        version ='1.1.0',
         author ='Samuel Rosean',
         author_email ='samuel.rosean@einsteinmed.edu',
         url ='https://github.com/samrosean/gaiaAssociation',
@@ -21,11 +21,11 @@ setup(
                 'gaia = gaiaAssociation.gaiaAssociation:main'
             ]
         },
-        classifiers =(
+        classifiers =[
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
             "Operating System :: OS Independent",
-        ),
+        ],
         keywords ='ATAC-seq loci enrichment',
         install_requires = requirements,
         zip_safe = False
