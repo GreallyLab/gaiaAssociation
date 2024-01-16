@@ -75,9 +75,7 @@ Gaia will now be runnable from the command line as described above.
 
 ## Step 2: Using gaiaAssociation:
 
-For a complete guide to using gaiaAssociation with a jupyterNotebook, you can see our example notebook and its associated data set at:
-
-[    ]
+A detailed guide and example notebook for using Gaia within a jupyter notebook environment can be found [here](https://github.com/GreallyLab/gaiaAssociation-Example-Guide).
 
 
 When using gaiaAssociation on the command line you can check your installation and to get basic information on using gaiaAssociation by typing this command into your terminal.
@@ -131,7 +129,7 @@ Loci Cutoff: a loci cutoff value, when given gaia will only consider loci groups
   -l, --lociCutoff
 ```
 
-Specific Loci: a tsv file with the specific loci groups you would like to use. This can be very helpful if using a large loci set with with many phenotypes, and you want to sort by more than just loci count. The tsv should have column names which also exist in the loci files, so that gaia can subset the loci based on these column values (e.g. if you have a column in your loci set titled "runs" and you would like to only use run 1, then a tsv with one column "runs" and one row value "1" will accomplish this). If the tsv file includes multiple columns, say "STUDY", and "DISEASE/TRAIT", then the loci set will be subset specifically by both columns at once. So only those that match every value within a row will be considered as a group (e.g. if you subset by "runs" and by "patient", then if only those loci that match both of these values will be considered).
+Specific Loci: a tsv or csv file with the specific loci groups you would like to use. This can be very helpful if using a large loci set with with many phenotypes, and you want to sort by more than just loci count. The tsv should have column names which also exist in the loci files, so that gaia can subset the loci based on these column values (e.g. if you have a column in your loci set titled "runs" and you would like to only use run 1, then a tsv with one column "runs" and one row value "1" will accomplish this). If the tsv/csv file includes multiple columns, say "STUDY", and "DISEASE/TRAIT", then the loci set will be subset specifically by both columns at once. So only those that match every value within a row will be considered as a group (e.g. if you subset by "runs" and by "patient", then if only those loci that match both of these values will be considered).
 
 ```
   -s, --specificLoci
@@ -160,6 +158,9 @@ Within a python file it will look like:
 ```
 gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", "user/documents/output", lociCutoff = 2000, peakUniqueness = 10, maskRegion = "user/documents/mask.txt", windowSize = 1000000)
 ```
+## Additional Notes
+
+1. Gaia is designed to be run on tsv and csv files in a utf-8 encoding format. Problems may arise from using files encoded in a different format, we recommend you ensure files are saved in this encoder if errors are occuring.
 
 
 ## How Gaia Works:
