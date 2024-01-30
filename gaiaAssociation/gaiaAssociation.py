@@ -671,15 +671,20 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             else:
                 out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]]))))
                 
-            heatmapMatrix[count,count2] = psinib(overlapValue-1, out1, out2, lowerTail=False)
-        
+            ## since psinib is a statistical method, sometimes root function finds results well outside the region near 0, this check accomodates this by turning all values over 1 into 1
+            valueSinib = psinib(overlapValue-1, out1, out2, lowerTail=False)
+            if valueSinib <= 1:
+                heatmapMatrix[count,count2] = valueSinib
+            else:
+                print("P-Value equal greater than one found. note: Sinib sometimes uses a statistical approximation of a p-value for non convergent cases, this can allow for impossible p-values. These  values are set to 1 in results.")
+                heatmapMatrix[count,count2] = 1
     try:
         print("Lowest P-Value: " + str(heatmapMatrix.min()))
     except ValueError:
         pass
     try:
         if heatmapMatrix.max() > 1:
-            print("P-Value Greater Than 1 Found. note: Sinib sometimes uses a statistical approximation of a p-value for non convergent cases, this can allow for impossible p-values.")
+            print("P-Value greater than one found in final matrix.")
     except ValueError:
         pass
     
