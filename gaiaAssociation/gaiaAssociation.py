@@ -16,6 +16,7 @@ import math
 import argparse
 from scipy.optimize import root
 from scipy.stats import norm
+import warnings
 
 
 ####
@@ -46,6 +47,9 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             sys.exit("Output folder cannot be built")
         else:
             print("Output folder succesfully built:")
+            
+    ## pyranges is a slightly outdated method and receives warnings about not properly identifying true or false values in certain instances
+    warnings.filterwarnings('ignore', module='pyranges')
     
     ##Bring in our atac files for each cell type
     dataFrameList = []
@@ -367,15 +371,6 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     
     ## Drop indexes of values that couldnt be forced into integer
     gwasFormatted = gwasNoNAN.drop(index=nonNumericIndexes)
-
-    
-    ## subset loci based on cutoff value
-    if lociCutoff != 0:
-        print("Subsetting loci based on user-defined count:")
-        vc = gwasFormatted.DT.value_counts()
-        highCount = list(vc[vc > int(lociCutoff)].index)
-        gwasFormatted = gwasFormatted[(gwasFormatted["DT"].isin(highCount))]
-    
     
     ##Create columns for turning into pyranges
     gwasFormatted["Start"] = gwasFormatted["CHR_POS"]
@@ -410,9 +405,18 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
                 print(dtName)
                 sys.exit("One of the user given loci groups does not exist")
                 
+                
     
     ### rename the Disease/Trait column to more easily callable DT column
     gwasFormatted = gwasFormatted.rename(columns={"DISEASE/TRAIT": "DT"})
+    
+    ## subset loci based on cutoff value
+    if lociCutoff != 0:
+        
+        print("Subsetting loci based on user-defined count:")
+        vc = gwasFormatted.DT.value_counts()
+        highCount = list(vc[vc > int(lociCutoff)].index)
+        gwasFormatted = gwasFormatted[(gwasFormatted["DT"].isin(highCount))]
     
     ##save pyranges for each disease/trait
     print("Turning GWAS into Pyranges Objects:")
@@ -538,7 +542,6 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     windowChrs = list(allWindowsDF.Chromosome)
     dictWindows = {"Start":windowStarts, "End":windowEnds, "Size":list(allWindowsDF.Size), "Chromosome":windowChrs}
 
-
     print("Calculating Overlaps: ")
     if indels == True:
         print("Note: Indels signifigantly effect runtime")
@@ -628,7 +631,17 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
                     ## add the count of indels to the original gwas count
                     dictWindows[reorderCellNames[count] + gwasNames[count2]] = [a+b for a,b in zip(dictWindows[reorderCellNames[count] + gwasNames[count2]], totalIndelList)]
                 
-                               
+
+    ## check to see if you can make a subfolder
+    if not os.path.exists(outputLocation+ '/overlaps'):
+        os.mkdir(outputLocation + '/overlaps')
+        if not os.path.exists(outputLocation + '/overlaps'):
+            sys.exit("Output folder cannot be modified, so overlaps will not be saved. Try running again with higher permissions.")
+            overlapSave = False
+        else:
+            overlapSave = True
+    else:
+        overlapSave = True
             
     print("Calculating P-Values: ")
     for count, item in enumerate(reorderPyranges):
@@ -639,10 +652,16 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             print(reorderCellNames[count], end = "\n")
             
         for count2, item2 in enumerate(gwasPyranges):
+            overlapCoverage = item.coverage(item2)
+            if overlapSave:
+                overlapCoverageFrame = overlapCoverage.df
+                overlapCoverageFrame = overlapCoverageFrame[overlapCoverageFrame["NumberOverlaps"] != 0]
+                overlapCoverageFrame.to_csv(outputLocation + '/overlaps' + '/overlap_' + gwasNames[count2][:10] + '_' + reorderCellNames[count][:10] + '.txt',sep='\t')
             overlapValue = sum(list(item.coverage(item2).NumberOverlaps))
             overlapMatrix[count,count2] = overlapValue
             if indels == True:
                 overlapValue = overlapValue + sum(dictWindows[reorderCellNames[count] + gwasNames[count2] + "IndelOverlap"])
+                
             
             ## if there are not indels, use the normal probabilities, if there are indels, use the gwas specific window probabilites
             if indels == False:
@@ -651,6 +670,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
                 out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]+ gwasNames[count2] + "Prob"]))))
             else:
                 out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]]))))
+                
             heatmapMatrix[count,count2] = psinib(overlapValue-1, out1, out2, lowerTail=False)
         
     try:
