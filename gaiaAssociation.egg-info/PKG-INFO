@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: gaiaAssociation
+Version: 1.1.2
+Summary: Compare ATAC-seq data to loci.
+Home-page: https://github.com/samrosean/gaiaAssociation
+Author: Samuel Rosean
+Author-email: samuel.rosean@einsteinmed.edu
+License: MIT
+Keywords: ATAC-seq loci enrichment
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+Compare ATAC-seq datasets against loci datasets to see if there is a specific enrichment between a particular loci set in a cell type
