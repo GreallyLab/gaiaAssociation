@@ -139,6 +139,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
                 print("Cell Type " + str(j+1), end = "\n") 
                 testFrame = pd.concat(prFrames[:j])
 
+
             
             allButMain = pr.PyRanges(testFrame)
             loopRange = prRanges[j].coverage(allButMain)
@@ -147,6 +148,21 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             mainFrame = mainFrame.drop(columns=['NumberOverlaps', 'FractionOverlaps'])
             mainRange = pr.PyRanges(mainFrame)
             prRangesUnique.append(mainRange)
+            
+            
+            if not os.path.exists(outputLocation + '/unique_regions'):
+                os.mkdir(outputLocation + '/unique_regions')
+                if not os.path.exists(outputLocation + '/unique_regions'):
+                    print("Output folder for new unique regions cannot be built")
+                    uniqueSave = False
+                else:
+                    uniqueSave = True
+            else:
+                uniqueSave = True
+                    
+            if uniqueSave == True:
+                mainFrame.to_csv(outputLocation + '/unique_regions' + '/unique_regions_' + cellNames[j][:10] + "_" + str(uniqueCount) + '.txt',sep='\t')
+            
 
         prRanges = prRangesUnique
         
@@ -636,7 +652,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     if not os.path.exists(outputLocation+ '/overlaps'):
         os.mkdir(outputLocation + '/overlaps')
         if not os.path.exists(outputLocation + '/overlaps'):
-            sys.exit("Output folder cannot be modified, so overlaps will not be saved. Try running again with higher permissions.")
+            print("Output folder cannot be modified, so overlaps will not be saved. Try running again with higher permissions.")
             overlapSave = False
         else:
             overlapSave = True
