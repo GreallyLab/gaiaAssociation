@@ -162,6 +162,10 @@ gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 
 1. Gaia is designed to be run on tsv and csv files in a utf-8 encoding format. Problems may arise from using files encoded in a different format, we recommend you ensure files are saved in this encoder if errors are occuring.
 
+2. Gaia does not have a built in genome build. Since the user provides the chromosome sizes, the OCR bed files, and the loci, as long as all three of these files are based on the same genome build it will run regardless of species/genome build.
+
+3. Files inputted into Gaia do not need to be sorted. The loci files or bed files do not need to be sorted for Gaia to properly run.
+
 
 ## How Gaia Works:
 
