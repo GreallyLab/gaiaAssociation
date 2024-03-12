@@ -292,6 +292,8 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             loopFrame["CHR_ID"] = loopFrame["Chromosome"]
         if "chr" in loopFrame.columns:
             loopFrame["CHR_ID"] = loopFrame["chr"]
+        if "Chr" in loopFrame.columns:
+            loopFrame["CHR_ID"] = loopFrame["Chr"]
             
         loopFrame["Chromosome"] = loopFrame["CHR_ID"]
         
@@ -341,6 +343,8 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             loopFrame["CHR_ID"] = loopFrame["Chromosome"]
         if "chr" in loopFrame.columns:
             loopFrame["CHR_ID"] = loopFrame["chr"]
+        if "Chr" in loopFrame.columns:
+            loopFrame["CHR_ID"] = loopFrame["Chr"]
             
         loopFrame["Chromosome"] = loopFrame["CHR_ID"]
         
@@ -690,7 +694,8 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             ## since psinib is a statistical method, sometimes root function finds results well outside the region near 0, this check accomodates this by turning all values over 1 into 1
             valueSinib = psinib(overlapValue-1, out1, out2, lowerTail=False)
             if valueSinib <= 1:
-                heatmapMatrix[count,count2] = valueSinib
+                ## this absolute value is due to a single error I could never track down. Every value gaiaAssociation returns I can recapitulate using psinib on rstudio, but some error of scipy's saddlepoint estimation (which is not exactly equivalent to Rs) returned a negative version of the same value in python during a single test case. 
+                heatmapMatrix[count,count2] = abs(valueSinib)
             else:
                 print("P-Value equal greater than one found. note: Sinib sometimes uses a statistical approximation of a p-value for non convergent cases, this can allow for impossible p-values. These  values are set to 1 in results.")
                 heatmapMatrix[count,count2] = 1
