@@ -65,13 +65,19 @@ This will allow you to use gaia inline as a python function:
 
 ### Github
 
-You can also download the source package from this github repository
+You can also download the source package from this github repository, or through the terminal using the command (though we recommend this method for people with much more eperience using python packages and python environments):
+
+	wget https://github.com/GreallyLab/gaiaAssociation/archive/main.zip
+
+And then unpacking this zip file using the command.
+
+	unzip main.zip
 
 From the location of this newly installed copy of the gaiaAssociation repository, run the setup command
 
 	python setup.py install
 
-Gaia will now be runnable from the command line as described above.
+Gaia will now be runnable from the command line as described above within this folder.
 
 ## Step 2: Using gaiaAssociation:
 
