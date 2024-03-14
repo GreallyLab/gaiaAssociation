@@ -35,7 +35,7 @@ gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyrang
 		
 ## Step 1: Install gaiaAssociation
 	
-### PyPi
+### PyPi (Recommended)
 
 #### For Command Line Usage:
 
