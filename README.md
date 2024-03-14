@@ -29,7 +29,7 @@ The above link will also help if you need to upgrade or update your pip installa
 
 ### Installing Required Libraries
 		
-gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyranges, seaborn, matplotlib, and setuptools. When installing gaiaAssociation through pip it will attempt to resolve these dependencies and install the necceassary versions. If this fails, each package can be downloaded using pip, for example:
+gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyranges, seaborn, matplotlib, and setuptools. When installing gaiaAssociation through pip it will attempt to resolve these dependencies and install the necceassary versions. If this fails, each package can be downloaded individually using pip, for example:
 
     pip install scipy
 		
