@@ -18,20 +18,24 @@ from scipy.optimize import root
 from scipy.stats import norm
 import warnings
 
-
+'''
 ####
 
-#### Gaia Association:
+Gaia Association:
 
-#### Compare chromatin accessibility data (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, SNPs, rare variants) to detect cell-specific enrichment of loci.
+Compare Open Chromatin Regions (e.g. ATAC-seq, DNase-seq) against loci sets (e.g. de-novo mutations, SNPs, rare variants) to detect cell-specific enrichment of loci.
 
-### Named for James Lovelock's Gaia Hypothesis
+Find the documentation at https://github.com/GreallyLab/gaiaAssociation
 
-####
+For help contact Samuel Rosean, samuel.rosean@einsteinmed.edu --- https://github.com/samrosean
 
+Named for James Lovelock's Gaia Hypothesis
+
+
+'''
 
 ##Primary function for associating ATAC and GWAS
-def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, uniqueCount=0, lociCutoff=0, lociSelection = 0, subsettingRegion=0, windowSize = 100000):
+def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, uniqueCount=0, lociCutoff=0, lociSelection = 0, subsettingRegion=0, windowSize = 100000, overlapSaveValue=1):
         
     ## ensure all the given locations and files are accesible and real
     if not os.path.exists(atacLocation):
@@ -673,10 +677,11 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             
         for count2, item2 in enumerate(gwasPyranges):
             overlapCoverage = item.coverage(item2)
-            if overlapSave:
-                overlapCoverageFrame = overlapCoverage.df
-                overlapCoverageFrame = overlapCoverageFrame[overlapCoverageFrame["NumberOverlaps"] != 0]
-                overlapCoverageFrame.to_csv(outputLocation + '/overlaps' + '/overlap_' + gwasNames[count2][:10] + '_' + reorderCellNames[count][:10] + '.txt',sep='\t')
+            if overlapSaveValue == 1:
+                if overlapSave:
+                    overlapCoverageFrame = overlapCoverage.df
+                    overlapCoverageFrame = overlapCoverageFrame[overlapCoverageFrame["NumberOverlaps"] != 0]
+                    overlapCoverageFrame.to_csv(outputLocation + '/overlaps' + '/overlap_' + gwasNames[count2][:10] + '_' + reorderCellNames[count][:10] + '.txt',sep='\t')
             overlapValue = sum(list(item.coverage(item2).NumberOverlaps))
             overlapMatrix[count,count2] = overlapValue
             if indels == True:
@@ -912,7 +917,9 @@ def main():
     parser.add_argument('-w', '--windowSize',  default=100000, required = False, type=int,
                         help='Size of the window you would like to create around each loci to make the statistical comparison for enrichment')
                         
+    parser.add_argument('-v', '--SaveOverlaps',  default=1, required = False, type=int,
+                        help='By default GaiaAssocaition saves the unique overlaps for each loci type and cell-type combination, though this can provide a computational and memory burdern in very large datasets. So optionally this may be turned off using this flag. Setting it equal to zero will stop this saving function.')
 
     args = parser.parse_args()
 
-    gaiaAssociation(args.cellRegion, args.loci, args.chrom, args.output, args.peakUniqueness, args.lociCutoff, args.specificLoci, args.maskRegion, args.windowSize)
+    gaiaAssociation(args.cellRegion, args.loci, args.chrom, args.output, args.peakUniqueness, args.lociCutoff, args.specificLoci, args.maskRegion, args.windowSize, args.SaveOverlaps)
