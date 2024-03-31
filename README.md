@@ -29,13 +29,13 @@ The above link will also help if you need to upgrade or update your pip installa
 
 ### Installing Required Libraries
 		
-gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyranges, seaborn, matplotlib, and setuptools. When installing gaiaAssociation through pip it will attempt to resolve these dependencies and install the necceassary versions. If this fails, each package can be downloaded using pip, for example:
+gaiaAssociation requires seven python dependancies: scipy, pandas, numpy, pyranges, seaborn, matplotlib, and setuptools. When installing gaiaAssociation through pip it will attempt to resolve these dependencies and install the necceassary versions. If this fails, each package can be downloaded individually using pip, for example:
 
     pip install scipy
 		
 ## Step 1: Install gaiaAssociation
 	
-### PyPi
+### PyPi (Recommended)
 
 #### For Command Line Usage:
 
@@ -65,13 +65,19 @@ This will allow you to use gaia inline as a python function:
 
 ### Github
 
-You can also download the source package from this github repository
+You can also download the source package from this github repository, or through the terminal using the command given below (though we recommend this method for people with much more eperience using python packages and python environments):
+
+	wget https://github.com/GreallyLab/gaiaAssociation/archive/main.zip
+
+And then unpacking this zip file using the command.
+
+	unzip main.zip
 
 From the location of this newly installed copy of the gaiaAssociation repository, run the setup command
 
 	python setup.py install
 
-Gaia will now be runnable from the command line as described above.
+Gaia will now be runnable from the command line as described above within this folder.
 
 ## Step 2: Using gaiaAssociation:
 
@@ -171,4 +177,4 @@ gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 
 By dividing each chromsome into roughly equivalent gaia window sizes based on a user-given value, enrichment is modeled as a binomial variable for each window where loci are found (wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window). The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. The non-identical binomial variables are summed utilizing the method developed by Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
-### Version 1.2.0
+### Version 1.2.1
