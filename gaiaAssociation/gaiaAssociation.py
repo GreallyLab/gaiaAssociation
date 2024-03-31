@@ -29,9 +29,9 @@ Find the documentation at https://github.com/GreallyLab/gaiaAssociation
 
 For help contact Samuel Rosean, samuel.rosean@einsteinmed.edu --- https://github.com/samrosean
 
-Named for James Lovelock's Gaia Hypothesis
+Named after James Lovelock's Gaia Hypothesis
 
-
+####
 '''
 
 ##Primary function for associating ATAC and GWAS
