@@ -88,7 +88,27 @@ When using gaiaAssociation on the command line you can check your installation a
 
 	gaia --help
 
-If correctly installed it should print out useful information about each variable and the flag to associate with each. gaiaAssocation has four required arguments, and five optional arguments. The four required arguments, which define a basic run are:
+If correctly installed it should print out useful information about each variable and the flag to associate with each. gaiaAssocation has four required arguments, and five optional arguments. 
+
+#### A Basic Run
+
+A default run on the command line using just the required arguments will therefore look like:
+
+```
+gaia \
+-a user/documents/atac \
+-g user/documents/loci \
+-c user/chrom/chrsize.csv \
+-o user/documents/output
+```
+
+And a default run in a python notebook will look like:
+
+```
+gaiaAssociation.gaiaAssociation.gaiaAssociation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", user/documents/output")
+```
+
+The four required arguments, which define a basic run are:
 
 #### Required Arguments
 
@@ -108,22 +128,6 @@ Chromosome Size: The location of a chromosome size file stored in a .csv format.
 Output Folder: The folder location you want the results to be output into. If this folder does not already exist gaia will attempt to make it. If it does not have the permissions to do so it will exit and the user will have to run it with folder creating permissions, or they will have to make the folder themselves.
 
 	-o, --output (either flag will work)
-
-A default run on the command line will therefore look like:
-
-```
-gaia \
--a user/documents/atac \
--g user/documents/loci \
--c user/chrom/chrsize.csv \
--o user/documents/output
-```
-
-A default run in a python notebook will look like:
-
-```
-gaiaAssociation.gaiaAssociation.gaiaAssociation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", user/documents/output")
-```
 
 #### Optional Arguments
 
