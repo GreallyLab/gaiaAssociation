@@ -65,7 +65,7 @@ This will allow you to use gaia inline as a python function:
 
 ### Github
 
-You can also download the source package from this github repository, or through the terminal using the command given below (though we recommend this method for people with much more eperience using python packages and python environments):
+You can also download the source package from this github repository, or through the terminal using the command given below (though we recommend this method for people with much more experience using python packages and python environments):
 
 	wget https://github.com/GreallyLab/gaiaAssociation/archive/main.zip
 
