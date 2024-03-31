@@ -112,10 +112,14 @@ Output Folder: The folder location you want the results to be output into. If th
 A default run on the command line will therefore look like:
 
 ```
-gaia -a user/documents/atac -g user/documents/loci -c user/chrom/chrsize.csv -o user/documents/output
+gaia \
+-a user/documents/atac \
+-g user/documents/loci \
+-c user/chrom/chrsize.csv
+-o user/documents/output
 ```
 
-A default run in python will look like:
+A default run in a python notebook will look like:
 
 ```
 gaiaAssociation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", user/documents/output")
@@ -156,7 +160,15 @@ Window Size: an integer given to represent the size of windows in bp that the us
 A run from the command line using these flags will therfore look like:
 
 ```
-gaia -a user/documents/atac -g user/documents/loci -c user/chrom/chrsize.csv -o user/documents/output -l 2000 -u 10 -m user/documents/mask.txt -w 1000000
+gaia \
+-a user/documents/atac \
+-g user/documents/loci \
+-c user/chrom/chrsize.csv \
+-o user/documents/output \
+-l 2000 \
+-u 10 \
+-m user/documents/mask.txt \
+-w 1000000
 ```
 
 Within a python file it will look like:
