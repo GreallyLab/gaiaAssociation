@@ -122,7 +122,7 @@ gaia \
 A default run in a python notebook will look like:
 
 ```
-gaiaAssociation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", user/documents/output")
+gaiaAssociation.gaiaAssociation.gaiaAssociation("user/documents/atac", "user/documents/loci", "user/chrom/chrsize.csv", user/documents/output")
 ```
 
 #### Optional Arguments
