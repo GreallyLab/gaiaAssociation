@@ -115,7 +115,7 @@ A default run on the command line will therefore look like:
 gaia \
 -a user/documents/atac \
 -g user/documents/loci \
--c user/chrom/chrsize.csv
+-c user/chrom/chrsize.csv \
 -o user/documents/output
 ```
 
