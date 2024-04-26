@@ -593,68 +593,77 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             
                 ## if indels exist in this particular gwas set continue on to indel caluclations
                 if gwasNonZeroPyranges[count2]:
-                
-                    ##Grab all indels that overlap with the current ATAC set
-                    indelRangeTemp = gwasNonZeroPyranges[count2].coverage(item)
-                    indelOverlap = indelRangeTemp.df
+                    if item:
                     
-                    ## keep only those that overlap
-                    indelOverlap = indelOverlap[indelOverlap["NumberOverlaps"] > 0]
-                    
-                    ##now create a list of every bp where an indel exists at
-                    indelOverlap = indelOverlap.reset_index(drop=True)
-                    indelOverlap['range']=indelOverlap.apply(lambda x : list(range(x['Start'],x['End'])),1)
-                    indelChroDict = {}
-                    for item in list(set(indelOverlap.Chromosome)):
-                        indelChroLoop = indelOverlap[indelOverlap["Chromosome"] == item]
-                        indelLoopLocations = [item for sublist in indelChroLoop["range"] for item in sublist]
-                        indelChroDict[item] = indelLoopLocations
-                    
-                    indelExtraOverlap = []
-                    
-                    ##Get the number of these overlaps for each window so we can add them to the count
-                    indelDoubleOverlap = indelOverlap.drop(['range', 'NumberOverlaps'], axis=1)
-                    indelDoubleOverlap = pr.PyRanges(indelDoubleOverlap)
-                    doubleOverlapCount = windowsRange.coverage(indelDoubleOverlap)
-                    doubleOverlapList = list(doubleOverlapCount.NumberOverlaps)
-                    
-                    ## for each window space, find how much length of indel exists in the window
-                    for windowCount, windowItem in enumerate(windowStarts):
-                            
-                        if windowChrs[windowCount] in indelChroDict:
-                            indelWindowSize = [num for num in indelChroDict[windowChrs[windowCount]] if num <= windowEnds[windowCount] and num >= windowStarts[windowCount]]
-                        else:
-                            indelWindowSize = []
-                            
-                        ## if none exist, add zero to list of indel overlap, if it does add the total number of bp that do
-                        if len(indelWindowSize) == 0:
-                            indelExtraOverlap.append(0)
-                        else:
-                            indelSize = len(indelWindowSize)
-                            indelExtraOverlap.append(indelSize)
+                        ##Grab all indels that overlap with the current ATAC set
+                        print("GWAS")
+                        print(gwasNonZeroPyranges[count2])
+                        print("ATAC")
+                        print(item)
+                        print("Count #")
+                        print(count2)
+                        print("---")
+                        indelRangeTemp = gwasNonZeroPyranges[count2].coverage(item)
                         
-                    ##grab the number of peaks per window
-                    listCount = dictWindows[reorderCellNames[count] + "PeakCount"]
+                        indelOverlap = indelRangeTemp.df
+                        
+                        ## keep only those that overlap
+                        indelOverlap = indelOverlap[indelOverlap["NumberOverlaps"] > 0]
+                        
+                        ##now create a list of every bp where an indel exists at
+                        indelOverlap = indelOverlap.reset_index(drop=True)
+                        indelOverlap['range']=indelOverlap.apply(lambda x : list(range(x['Start'],x['End'])),1)
+                        indelChroDict = {}
+                        for itemChr in list(set(indelOverlap.Chromosome)):
+                            indelChroLoop = indelOverlap[indelOverlap["Chromosome"] == itemChr]
+                            indelLoopLocations = [itemx for sublist in indelChroLoop["range"] for itemx in sublist]
+                            indelChroDict[item] = indelLoopLocations
+                        
+                        indelExtraOverlap = []
+                        
+                        ##Get the number of these overlaps for each window so we can add them to the count
+                        indelDoubleOverlap = indelOverlap.drop(['range', 'NumberOverlaps'], axis=1)
+                        indelDoubleOverlap = pr.PyRanges(indelDoubleOverlap)
+                        doubleOverlapCount = windowsRange.coverage(indelDoubleOverlap)
+                        doubleOverlapList = list(doubleOverlapCount.NumberOverlaps)
+                        
+                        ## for each window space, find how much length of indel exists in the window
+                        for windowCount, windowItem in enumerate(windowStarts):
+                                
+                            if windowChrs[windowCount] in indelChroDict:
+                                indelWindowSize = [num for num in indelChroDict[windowChrs[windowCount]] if num <= windowEnds[windowCount] and num >= windowStarts[windowCount]]
+                            else:
+                                indelWindowSize = []
+                                
+                            ## if none exist, add zero to list of indel overlap, if it does add the total number of bp that do
+                            if len(indelWindowSize) == 0:
+                                indelExtraOverlap.append(0)
+                            else:
+                                indelSize = len(indelWindowSize)
+                                indelExtraOverlap.append(indelSize)
+                            
+                        ##grab the number of peaks per window
+                        listCount = dictWindows[reorderCellNames[count] + "PeakCount"]
+                        
+                        ##multiply the extra length we need to add to every atac peak within every window
+                        listSize = [a*b for a,b in zip(listCount,indelExtraOverlap)]
+                        
+                        ## take this extra size to calculate an added probability
+                        listProb = [a/b for a,b in zip(listSize, dictWindows["Size"])]
+                        
+                        ##Add this probability to the base probability for a gwas specific probability
+                        dictWindows[reorderCellNames[count]+ gwasNames[count2] + "Prob"] = [a+b for a,b in zip(dictWindows[reorderCellNames[count]], listProb)]
+                        
+                        ##Add number of indel overlaps
+                        dictWindows[reorderCellNames[count] + gwasNames[count2] + "IndelOverlap"] =  doubleOverlapList
+                        
+                        ## Get the total number of indels in region to add to count
+                        totalIndelRange = windowsRange.coverage(gwasNonZeroPyranges[count2])
+                        totalIndelList = list(totalIndelRange.NumberOverlaps)
+                        
+                        ## add the count of indels to the original gwas count
+                        dictWindows[reorderCellNames[count] + gwasNames[count2]] = [a+b for a,b in zip(dictWindows[reorderCellNames[count] + gwasNames[count2]], totalIndelList)]
                     
-                    ##multiply the extra length we need to add to every atac peak within every window
-                    listSize = [a*b for a,b in zip(listCount,indelExtraOverlap)]
-                    
-                    ## take this extra size to calculate an added probability
-                    listProb = [a/b for a,b in zip(listSize, dictWindows["Size"])]
-                    
-                    ##Add this probability to the base probability for a gwas specific probability
-                    dictWindows[reorderCellNames[count]+ gwasNames[count2] + "Prob"] = [a+b for a,b in zip(dictWindows[reorderCellNames[count]], listProb)]
-                    
-                    ##Add number of indel overlaps
-                    dictWindows[reorderCellNames[count] + gwasNames[count2] + "IndelOverlap"] =  doubleOverlapList
-                    
-                    ## Get the total number of indels in region to add to count
-                    totalIndelRange = windowsRange.coverage(gwasNonZeroPyranges[count2])
-                    totalIndelList = list(totalIndelRange.NumberOverlaps)
-                    
-                    ## add the count of indels to the original gwas count
-                    dictWindows[reorderCellNames[count] + gwasNames[count2]] = [a+b for a,b in zip(dictWindows[reorderCellNames[count] + gwasNames[count2]], totalIndelList)]
-                
 
     ## check to see if you can make a subfolder
     if not os.path.exists(outputLocation+ '/overlaps'):
