@@ -570,6 +570,8 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     print("Calculating Overlaps: ")
     if indels == True:
         print("Note: Indels signifigantly effect runtime")
+        
+    ## loop through each cell type
     for count, item in enumerate(reorderPyranges):
     
         if( count != len(reorderPyranges) - 1):
