@@ -857,7 +857,7 @@ def p4(u,n,p,s,mu):
 
 def calc_p4(s, n, p, mu):
     if (s == sum(n)):
-        p4b=np.prod([a**b for a,b in zip(p,n)])
+        p4_=np.prod([a**b for a,b in zip(p,n)])
     else:
         test = root(lambda x: saddlepoint(x,n,p,s), 0)
         u_hat = test.x[0]
