@@ -1,0 +1,2 @@
+[console_scripts]
+gaia = gaiaAssociation.gaiaAssociation:main
