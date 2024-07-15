@@ -575,7 +575,12 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         if( count != len(reorderPyranges) - 1):
             print(reorderCellNames[count], end = " - ")
         else:
-            print(reorderCellNames[count], end = "\n")
+            if count < len(reorderCellNames):
+                print(reorderCellNames[count], end = "\n")
+            else:
+                print("Sequence Error, Cell Names May Be Incorrectly Labeled")
+                print(cellNames[count], end = "\n")
+                reorderCellNames[count] = cellNames[count]
     
         tempRange = windowsRange.coverage(item)
         dictWindows[reorderCellNames[count]] = list(tempRange.FractionOverlaps)
