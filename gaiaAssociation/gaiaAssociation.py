@@ -515,6 +515,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     else:
         reorderPyranges = prRanges
         reorderDataframeList = dataFrameList
+        reorderCellNames = cellNames
     
     ## create matrices to store p-values and overlap information
     heatmapMatrix = np.zeros((len(reorderPyranges),len(gwasPyranges)))
