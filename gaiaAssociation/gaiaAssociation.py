@@ -575,7 +575,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
         if( count != len(reorderPyranges) - 1):
             print(reorderCellNames[count], end = " - ")
         else:
-            if count < len(reorderCellNames):
+            if count == len(reorderCellNames) - 1:
                 print(reorderCellNames[count], end = "\n")
             else:
                 print("Sequence Error, Cell Names May Be Incorrectly Labeled")
