@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: gaiaAssociation
-Version: 1.2.4
+Version: 1.2.7
 Summary: Compare ATAC-seq data to loci.
 Home-page: https://github.com/samrosean/gaiaAssociation
 Author: Samuel Rosean
