@@ -721,11 +721,23 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
             
             ## if there are not indels, use the normal probabilities, if there are indels, use the gwas specific window probabilites
             if indels == False:
-                out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]]))))
+                try:
+                    out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]]))))
+                except:
+                    out1 = (0,)
+                    out2 = (0,)
             elif gwasNonZeroPyranges[count2]:
-                out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]+ gwasNames[count2] + "Prob"]))))
+                try:
+                    out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]+ gwasNames[count2] + "Prob"]))))
+                except:
+                    out1 = (0,)
+                    out2 = (0,)
             else:
-                out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]]))))
+                try:
+                    out1, out2 = zip(*filter(all, zip(list(dictWindows[reorderCellNames[count] + gwasNames[count2]]), list(dictWindows[reorderCellNames[count]]))))
+                except:
+                    out1 = (0,)
+                    out2 = (0,)
                 
             ## since psinib is a statistical method, sometimes root function finds results well outside the region near 0, this check accomodates this by turning all values over 1 into 1
             valueSinib = psinib(overlapValue-1, out1, out2, lowerTail=False)
