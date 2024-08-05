@@ -13,6 +13,8 @@ A detailed guide and example notebook for using Gaia within a jupyter notebook e
 
 Samuel Rosean, samuel.rosean@einsteinmed.edu --- https://github.com/samrosean
 
+Version - 1.2.30
+
 ****
 
 ## Step 0: Installing Python and Pip:
