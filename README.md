@@ -13,8 +13,6 @@ A detailed guide and example notebook for using Gaia within a jupyter notebook e
 
 Samuel Rosean, samuel.rosean@einsteinmed.edu --- https://github.com/samrosean
 
-Version - 1.2.30
-
 ****
 
 ## Step 0: Installing Python and Pip:
@@ -195,4 +193,4 @@ gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 
 By dividing each chromsome into roughly equivalent gaia window sizes based on a user-given value, enrichment is modeled as a binomial variable for each window where loci are found (wherein the probability is determined by the proportion of the window covered by open chromatin regions and the count is number of loci found within that window). The sum of these binomial variables are compared against the number of global overlaps between a cell-type's OCRs and the given loci set. The non-identical binomial variables are summed utilizing the method developed by Boxiang Liu and Thomas Quertermous (https://journal.r-project.org/archive/2018/RJ-2018-011/RJ-2018-011.pdf).
 
-### Version 1.2.1
+### Version 1.2.30
