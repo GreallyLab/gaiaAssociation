@@ -188,6 +188,8 @@ gaiaAsscoiation("user/documents/atac", "user/documents/loci", "user/chrom/chrsiz
 
 3. Files inputted into Gaia do not need to be sorted. The loci files or bed files do not need to be sorted for Gaia to properly run.
 
+4. A pre-configured ATAC-seq library of 222 cell types from 'A single-cell atlas of chromatin accessibility in the human genome by Zhang et al. (2021)' (PMC: 8664161) are included in the [gaiaAssociation Example guide.](https://github.com/GreallyLab/gaiaAssociation-Example-Guide)
+
 
 ## How Gaia Works:
 
