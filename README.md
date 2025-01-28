@@ -161,7 +161,7 @@ Window Size: an integer given to represent the size of windows in bp that the us
   -w, --windowSize
 ```
 
-A run from the command line using these flags will therfore look like:
+A run from the command line using these flags will therefore look like:
 
 ```
 gaia \
