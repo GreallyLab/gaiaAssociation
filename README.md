@@ -117,7 +117,7 @@ OCR Folder: the folder location of the OCR bed files stored in .txt format. The 
 	-a, --atac  (either flag will work)
 
 Loci Folder: the folder location of the loci files stored in .tsv and/or .csv format.
-These files can be formatted differently depending on the type of loci being compared. If these loci are a single base pair long then only two columns are required: “CHR_ID” and “CHR_POS” which refer to its genome location and its chromosome name respectively. If these are variably sized loci you can include “Start” and “End” instead of “CHR_POS”. If you would like to give specific labels to each loci set, since by default we will name the loci set by their filename, you can include a column titled "DISEASE/TRAIT", which allows for multiple loci sets to be analyzed within one file.
+These files can be formatted differently depending on the type of loci being compared. If these loci are a single base pair long then only two columns are required: “CHR_ID” and “CHR_POS” which refer to its genome location and its chromosome name respectively. If these are variably sized loci you can include “Start” and “End” instead of “CHR_POS”. If you would like to give specific labels to each loci set, since by default we will name the loci set by their filename, you can include a column titled "DISEASE/TRAIT", which allows for multiple loci sets to be analyzed within one file. (Note: Keep in mind if you have a column titled "DISEASE/TRAIT" that files and folders will be named with the content of this column, so avoid using slashes, dots, or other characters that will pausibly cause issues with file or folder names)
 
 	-g , --loci (either flag will work)
 
@@ -161,7 +161,7 @@ Window Size: an integer given to represent the size of windows in bp that the us
   -w, --windowSize
 ```
 
-A run from the command line using these flags will therfore look like:
+A run from the command line using these flags will therefore look like:
 
 ```
 gaia \
