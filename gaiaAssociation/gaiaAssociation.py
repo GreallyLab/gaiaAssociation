@@ -260,14 +260,14 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     final_columns = ["CHR_ID", "Start", "CHR_POS", "End", "Chromosome", "DISEASE/TRAIT"]
     if lociSelection != 0:
     
+        ## save csv or tsv
         if lociSelection[-3:] == "tsv":
             lociSelectDF=pd.read_csv(lociSelection,sep='\t')
         elif lociSelection[-3:] == "csv":
             lociSelectDF=pd.read_csv(lociSelection)
         tempColumnList = lociSelectDF.columns
         final_columns.extend(tempColumnList)
-    
-    
+
     
     ##add GWAS in tsv format
     for filename in glob.glob(gwasLocation + "/" + '*.tsv'):
@@ -449,7 +449,10 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
     indels = False
     
     if lociSelection == 0:
+        ## if you don't have specified loci, than save every possible disease/trait as a unique group
         gwasNames = list(set(gwasFormatted["DT"]))
+        
+        ## get subset for each unique group
         for item in set(gwasFormatted["DT"]):
             
             ##subset for each loci type
@@ -492,6 +495,7 @@ def gaiaAssociation(atacLocation, gwasLocation, chromosomeSize, outputLocation, 
                 gwasNonZeroPyranges.append([])
                 
     else:
+        ## if you do specify which groups only select those ones
         for countIndel, item in enumerate(eachLociFrame):
             
             ##remove duplicate loci
